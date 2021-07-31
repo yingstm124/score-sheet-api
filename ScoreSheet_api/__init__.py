@@ -1,9 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 
-app = Flask('ScoreSheet_api')
+app = Flask('ScoreSheet_api',static_url_path='/static')
 
-app.config["IMAGE_UPLOADES"] = "./images"
 
 app.debug = True
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
