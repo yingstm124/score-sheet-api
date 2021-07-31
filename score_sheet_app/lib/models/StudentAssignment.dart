@@ -24,7 +24,7 @@ class StudentAssignment {
         StudentId: json["StudentId"],
         FirstName: json["FirstName"],
         LastName: json["LastName"],
-        Img: json["Img"],
+        Img: json["Img"] ,
         SecNo: json["SecNo"]);
   }
 

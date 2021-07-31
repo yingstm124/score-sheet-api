@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:score_sheet_app/helpers/BaseApi.dart';
 import 'package:score_sheet_app/models/StudentAssignment.dart';
@@ -25,5 +27,33 @@ class StudentAssignmentApi {
       EasyLoading.dismiss();
       throw Exception("Failed !");
     }
+  }
+
+  static Future<bool> saveImage(int _studentAssignmentId, File _image) async {
+    String url = _baseUrl + '/saveImage?studentAssignmentId=${_studentAssignmentId}';
+    final headers = { "Content-Type": "multipart/form-data" };
+    EasyLoading.show(status: 'loading..');
+    final request = await http.MultipartRequest(
+      "POST", Uri.parse(url)
+    );
+
+    request.files.add(http.MultipartFile(
+      'image', _image.readAsBytes().asStream(), _image.lengthSync(),
+      filename: _image.path.split('/').last
+    ));
+
+    request.headers.addAll(headers);
+    final res = await request.send();
+
+    if(res.statusCode == 200){
+        EasyLoading.dismiss();
+        return true;
+    }
+    else{
+      EasyLoading.showError('Failed with Error');
+      EasyLoading.dismiss();
+      return false;
+    }
+
   }
 }

@@ -1,13 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:score_sheet_app/apis/StudentAssignmentApi.dart';
 import 'package:score_sheet_app/components/CourseHeader/CourseHeader.dart';
 import 'package:score_sheet_app/components/ExpandableFabCustom/ExpandableFab.dart';
 import 'package:score_sheet_app/components/StudentAssignmentPage/PreviewImage/PreviewImage.dart';
+import 'package:score_sheet_app/helpers/BaseApi.dart';
 import 'package:score_sheet_app/models/Assignment.dart';
 import 'package:score_sheet_app/models/StudentAssignment.dart';
 import 'package:score_sheet_app/models/TeachCourse.dart';
@@ -107,13 +107,7 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
-                                  FadeInImage(
-                                      placeholder: AssetImage(
-                                          'placeholderImage.png'),
-                                      image: AssetImage('placeholderImage.png'),
-                                      height: 150,
-                                      fit: BoxFit.fill
-                                  ),
+                                  e.Img == null ?  Image(image: AssetImage('placeholderImage.png'), height: 150) : Image.network('${BaseApi.getBaseAPI()}${e.Img}', height: 150,fit:BoxFit.fill),
                                   ListTile(
                                     title: Text(
                                         '${e.FirstName} ${e.LastName} ( Sec ${e
@@ -148,7 +142,7 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                PreviewImage(image: _imageFileList![0])
+                                PreviewImage(getStudentAssignment: _getStudentAssignment,image: _imageFileList![0])
                         )
                     );
                   }
@@ -164,7 +158,7 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                PreviewImage(image: _imageFileList![0])
+                                PreviewImage(getStudentAssignment: _getStudentAssignment,image: _imageFileList![0])
                         )
                     );
                   }
