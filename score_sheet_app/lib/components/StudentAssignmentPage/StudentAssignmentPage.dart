@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:score_sheet_app/apis/StudentAssignmentApi.dart';
@@ -33,64 +34,49 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
 
   List<CameraDescription> cameras = [];
   List<StudentAssignment> _studentAssignments = [];
-  CameraController? controller;
-  bool openCameraPreview = false;
-  //File? _image;
 
-  late ImagePicker _image = ImagePicker();
+  List<XFile>? _imageFileList;
+
+  set _imageFile(XFile? value) {
+    _imageFileList = value == null ? null : [value];
+  }
+
+  dynamic _pickImageError;
+  bool isVideo = false;
+  String? _retrieveDataError;
+
+  final ImagePicker _picker = ImagePicker();
+  final TextEditingController maxWidthController = TextEditingController();
+  final TextEditingController maxHeightController = TextEditingController();
+  final TextEditingController qualityController = TextEditingController();
+
 
   @override
   void initState() {
     super.initState();
     _getStudentAssignment();
-
   }
 
-  void initialCamera() async{
-    // allow first camera
-    WidgetsFlutterBinding.ensureInitialized();
-    final cameras = await availableCameras();
 
-    // access to camera
-    controller = CameraController(cameras[0], ResolutionPreset.max);
-    controller?.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        openCameraPreview = true;
-      });
-    });
-
-  }
-
-  Future _getImage() async{
-    final image = await ImagePicker.platform.pickImage(source: ImageSource.camera);
+  Future _onImageButtonPressed(ImageSource source,
+      {BuildContext? context}) async {
     try {
+      final pickedFile = await _picker.pickImage(
+          source: source
+      );
       setState(() {
-        _image = image as ImagePicker;
+        _imageFile = pickedFile;
       });
-
-        print('Preview image');
-
-
+    } catch (e) {
+      setState(() {
+        _pickImageError = e;
+      });
     }
-    catch(e) {
-      print(e);
-    }
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    setState(() {
-      openCameraPreview = false;
-    });
-    super.dispose();
   }
 
   void _getStudentAssignment() async {
-    final results = await StudentAssignmentApi.getStudentAssignment(teachCourse.TeachCourseId);
+    final results = await StudentAssignmentApi.getStudentAssignment(
+        teachCourse.TeachCourseId);
     setState(() {
       _studentAssignments = results;
     });
@@ -99,79 +85,95 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
 
   @override
   Widget build(BuildContext context) {
-    if(!openCameraPreview){
-      return  Scaffold(
-          appBar: AppBar(
-              title: Text('Semester ${teachCourse.Term}/${teachCourse.Year}')
-          ),
-          body: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Container(
-                  margin: EdgeInsets.only(top: 30),
-                  child: CourseHeader(
-                    teachCourse: teachCourse,
-                  )),
-              Expanded(
-                  child: ListView(
-                      children: _studentAssignments.map((e){
-                        return InkWell(
-                          child: Card(
-                              child: Container(
-                                margin: EdgeInsets.all(10),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    FadeInImage(
-                                        placeholder: AssetImage('placeholderImage.png'),
-                                        image: AssetImage('placeholderImage.png'),
-                                        height: 150,
-                                        fit:BoxFit.fill
-                                    ),
-                                    ListTile(
-                                      title: Text(
-                                          '${e.FirstName} ${e.LastName} ( Sec ${e.SecNo.toString()})'),
-                                      subtitle: Text(e.StudentId.toString()),
-                                    )
-                                  ],
-                                ),
-                              )
-                          ),
-                          onTap: (){
-                            print('click');
-                          },
-                        );
-                      }).toList()
-                  )
+    return Scaffold(
+        appBar: AppBar(
+            title: Text('Semester ${teachCourse.Term}/${teachCourse.Year}')
+        ),
+        body: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Container(
+                margin: EdgeInsets.only(top: 30),
+                child: CourseHeader(
+                  teachCourse: teachCourse,
+                )),
+            Expanded(
+                child: ListView(
+                    children: _studentAssignments.map((e) {
+                      return InkWell(
+                        child: Card(
+                            child: Container(
+                              margin: EdgeInsets.all(10),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  FadeInImage(
+                                      placeholder: AssetImage(
+                                          'placeholderImage.png'),
+                                      image: AssetImage('placeholderImage.png'),
+                                      height: 150,
+                                      fit: BoxFit.fill
+                                  ),
+                                  ListTile(
+                                    title: Text(
+                                        '${e.FirstName} ${e.LastName} ( Sec ${e
+                                            .SecNo.toString()})'),
+                                    subtitle: Text(e.StudentId.toString()),
+                                  )
+                                ],
+                              ),
+                            )
+                        ),
+                        onTap: () {
+                          print('click');
+                        },
+                      );
+                    }).toList()
+                )
+            ),
+          ],
+        ),
+        floatingActionButton: Container(
+          margin: EdgeInsets.all(5),
+          child: ExpandableFab(
+            distance: 60.0,
+            children: [
+              ActionButton(
+                icon: Icon(Icons.image),
+                onPressed: () async {
+                  print('uploade image');
+                  await _onImageButtonPressed(ImageSource.gallery, context: context);
+                  if(_imageFileList != null){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PreviewImage(image: _imageFileList![0])
+                        )
+                    );
+                  }
+                },
               ),
+              ActionButton(
+                icon: Icon(Icons.camera_alt),
+                onPressed: () async {
+                  print('camera');
+                  await _onImageButtonPressed(ImageSource.camera, context: context);
+                  if(_imageFileList != null){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                PreviewImage(image: _imageFileList![0])
+                        )
+                    );
+                  }
+                },
+              )
             ],
           ),
-          floatingActionButton: Container(
-            margin: EdgeInsets.all(5),
-            child: ExpandableFab(
-              distance: 60.0,
-              children: [
-                ActionButton(
-                  icon: Icon(Icons.image),
-                  onPressed: (){
-                    print('uploade image');
-                  },
-                ),
-                ActionButton(
-                  icon: Icon(Icons.camera),
-                  onPressed: () async {
-                    //initialCamera();
-                    _getImage();
-                    print('camera');
-
-                  },
-                )
-              ],
-            ),
-          )
-      );
-    }else {
-      return CameraPreview(controller!);
-    }
+        )
+    );
   }
+
 }

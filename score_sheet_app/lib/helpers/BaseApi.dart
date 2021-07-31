@@ -1,5 +1,5 @@
 class BaseApi {
   static String getBaseAPI() {
-    return 'http://8e38d54c9c83.ngrok.io';
+    return 'http://7e20fa2c7b7a.ngrok.io';
   }
 }

@@ -11,7 +11,7 @@ class AssignmentAddForm extends StatefulWidget {
   Function getAssignments;
   Function getTotalAssignment;
   TeachCourse teachCourse;
-  AssignmentAddForm({ required this.teachCourse, required this.getAssignments, required this.getTotalAssignment });
+   AssignmentAddForm({ required this.teachCourse, required this.getAssignments, required this.getTotalAssignment });
   @override
   _AssignmentAddForm createState() => _AssignmentAddForm(teachCourse: teachCourse, getAssignments: getAssignments, getTotalAssignment: getTotalAssignment);
 }

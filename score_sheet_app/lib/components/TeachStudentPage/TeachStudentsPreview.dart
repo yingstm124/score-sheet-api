@@ -71,8 +71,9 @@ class _TeachStudentsPreview extends State<TeachStudentsPreview>{
 
                     if(_importSuccess){
                       print('success');
-                      Navigator.of(context).pop();
                       getTeachStudents();
+                      Navigator.of(context).pop();
+
                     }
 
                   },
