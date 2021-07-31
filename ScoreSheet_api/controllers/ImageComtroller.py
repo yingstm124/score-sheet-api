@@ -9,6 +9,7 @@ import pymysql
 # initial database
 cursor = getDb().cursor()
 
+
 @app.route('/saveImage', methods=['POST'])
 def uploadImage():
     if request.method == "POST":

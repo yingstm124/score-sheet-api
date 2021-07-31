@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify, json
 from ScoreSheet_api.config.database import getDb
 from ScoreSheet_api.helpers.DbUtillity import Convert_to_Json, Handle_error
 
+import os
 import pymysql
 
 # initial database
@@ -11,6 +12,7 @@ cursor = getDb().cursor()
 
 @app.route('/')
 def hello():
+    print(os.getcwd())
     return 'Hello Score Sheet !';
 
 @app.route('/teachCourses', methods=['GET'])
