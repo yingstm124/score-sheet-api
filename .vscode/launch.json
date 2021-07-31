@@ -1,0 +1,41 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+
+    {
+        "name":"Score Sheet api: Flask",
+        "type":"python",
+        "request":"launch",
+        "module": "flask",
+        "env": {
+            "FLASK_APP": "app.py",
+            "FLASK_ENV": "development",
+            "FLASK_DEBUG": "0"
+        },
+        "args": [
+            "run",
+            "--no-debugger",
+            "--no-reload"
+        ],
+        "jinja": true
+    },
+
+        {
+            "name": "scoresheet_app",
+            "cwd": "scoresheet_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "scoresheet_app (profile mode)",
+            "cwd": "scoresheet_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        }
+    ]
+}
