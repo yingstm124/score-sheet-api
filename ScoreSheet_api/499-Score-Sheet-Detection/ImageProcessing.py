@@ -41,20 +41,22 @@ class BinaryImage:
 
 class CellSheets:
 
-    def __init__(self, binaryImage, debug=False, max_cols=20):
+    def __init__(self, img, binaryImage, debug=False, max_cols=20):
         self.debug = debug
+        self.orginalImage = img
         self.binary_image = binaryImage  
         self.max_cols = max_cols    
         self.amountOfRow = 0
+        self.paper = np.zeros(img.shape, dtype=np.uint8)
 
     def getCellSheets(self):
 
         # 1. contour all for finding cell
-        contour_sheet = Processing.contours(self.binary_image, 'RETR_LIST')
-
+        contour_sheet, _ = Processing.contours(self.binary_image, 'RETR_LIST')
+            
         # 2. sorting contour
         contour_sheet_sorted, _ = Processing.sortContours(contour_sheet, method="left-to-right", debug=self.debug)
-        
+
         # 3. add cell image in cell bounding array
         sheet_width = self.binary_image.shape[1]
         cell_minWidth = (sheet_width/self.max_cols)
@@ -73,15 +75,13 @@ class CellSheets:
                 x, y, w, h = cv2.boundingRect(approx)
 
                 is_digit_cell = True if w/h < 2 else False
-
                 if(w > cell_minWidth):
-
                     temp_cell.append(self.binary_image[y:y+h, x:x+w])
 
                     if(is_digit_cell):
                         digit_cell.append(self.binary_image[y:y+h, x:x+w])
-                        if(self.debug):
-                            Utility.showImage(self.binary_image[y:y+h, x:x+w],"digit cell (width,height) : ({0},{1})".format(w,h))
+                        # if(self.debug):
+                        #     Utility.showImage(self.binary_image[y:y+h, x:x+w],"digit cell (width,height) : ({0},{1})".format(w,h))
 
                     if(i == 1): 
                         first_row_width = w
@@ -90,23 +90,31 @@ class CellSheets:
                         amount_of_row = amount_of_row + 1
                         row_cell.append(self.binary_image[y:y+h, x:x+w])
         
-                        if(self.debug):
-                            Utility.showImage(self.binary_image[y:y+h, x:x+w],"row cell (width,height) : ({0},{1})".format(w,h))
+                        # if(self.debug):
+                        #     Utility.showImage(self.binary_image[y:y+h, x:x+w],"row cell (width,height) : ({0},{1})".format(w,h))
                     
                     i = i+1
+                    
+                    if(self.debug):
+                        x_pos = int(x+5)
+                        y_pos = int(y + h/2)
+                        color = (0,255,0)
+                        if(i%2 == 0):
+                            color = (255,0,0)
+                        
+                        cv2.drawContours(self.paper, [cnt], 0, color, 3)
+                        cv2.putText(self.paper, "{0}".format(i), (x_pos,y_pos),cv2.FONT_HERSHEY_SIMPLEX, 2, (2,255,0),2,cv2.LINE_AA)
 
         self.amountOfRow = amount_of_row
         student_id_cell = temp_cell[amount_of_row+1]
         if(self.debug):
+            cnt = contour_sheet_sorted[4]
+            Utility.showImage(self.paper,"image segment")
             Utility.showImage(student_id_cell,"student id cell (width,height) : ({0},{1})".format(w,h))
-        
+
+
         return row_cell, student_id_cell
 
-
-class DigitBox:
-    def __init__(self, cellSheet, debug=False):
-        self.debug = debug
-        self.cell_sheet = cellSheet
 
 
 

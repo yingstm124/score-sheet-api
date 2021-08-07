@@ -15,11 +15,11 @@ if __name__ == '__main__':
     #Utility.showImage(img, 'original image')
 
     # 2. convert to binary image
-    binary_image = BinaryImage(img, True).getBinaryImage()
+    binary_image = BinaryImage(img).getBinaryImage()
 
     # 3. processing cell
-    row_cell, student_id_cell = CellSheets(binary_image, True).getCellSheets()
-
+    row_cell, student_id_cell = CellSheets(img, binary_image, True).getCellSheets()
+    
 
     # cellBoxs = cell_sheets.scoreSheet
     # amount_of_row = cell_sheets.amountOfRow
