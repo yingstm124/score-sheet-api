@@ -1,5 +1,6 @@
 import cv2
 import matplotlib.pyplot as plt
+import numpy as np
 
 def showImage(img, title=''):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -52,6 +53,11 @@ def resize28Image(img, debug=False,expect_width=28, expect_height=28):
         showImage(img_resize, 'resized Image')
 
     return img_resize
+
+
+def get_bounding_rect_content(img, bounding_rect):
+    x, y, w, h = bounding_rect
+    return img[y:y+h, x:x+w]
 
 
 # def saveimage(img, img_name, path='output'):

@@ -12,10 +12,11 @@ if __name__ == '__main__':
     
     # 1. import original rgb image 
     img = cv2.imread('/Users/macbook/Desktop/204499_independence/Code/ScoreSheet_api/499-Score-Sheet-Detection/asset/sample01.png')
-    #Utility.showImage(img, 'original image')
+
 
     # 2. convert to binary image
     binary_image = BinaryImage(img).getBinaryImage()
+    #binary_image = Processing.getPerspective(img, binary_image)
 
     # 3. processing cell
     row_cell, student_id_cell = CellSheets(img, binary_image, True).getCellSheets()

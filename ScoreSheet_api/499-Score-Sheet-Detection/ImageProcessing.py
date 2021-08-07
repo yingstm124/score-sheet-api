@@ -51,7 +51,7 @@ class CellSheets:
 
     def getCellSheets(self):
 
-        # 1. contour all for finding cell
+        # 1. contour all for finding cell            
         contour_sheet, _ = Processing.contours(self.binary_image, 'RETR_LIST')
             
         # 2. sorting contour
@@ -79,7 +79,24 @@ class CellSheets:
                     temp_cell.append(self.binary_image[y:y+h, x:x+w])
 
                     if(is_digit_cell):
-                        digit_cell.append(self.binary_image[y:y+h, x:x+w])
+                        cell_ = self.binary_image[y+10:y+h-10, x+10:x+w-10]
+                        digit_cell.append(cell_)
+                        
+                        if(self.debug):
+                            Utility.showImage(cell_, 'box')
+                            
+                        digit_contours, _ = Processing.contours(cell_)
+                        digit_contours_sorted, _ = Processing.sortContours(digit_contours)
+                        
+                        for dc in digit_contours_sorted:
+                            peri_ = cv2.arcLength(dc, True)
+                            approx_ = cv2.approxPolyDP(dc, 0.02 * peri_, True)
+                            x_, y_, w_, h_ = cv2.boundingRect(approx_)
+                            
+                            d_cell_ = cell_[y_:y_+h_,x_:x_+w_]
+                            if(self.debug):
+                                Utility.showImage(d_cell_, '{0},{1}'.format(w_,h_))
+                            
                         # if(self.debug):
                         #     Utility.showImage(self.binary_image[y:y+h, x:x+w],"digit cell (width,height) : ({0},{1})".format(w,h))
 
@@ -87,7 +104,7 @@ class CellSheets:
                         first_row_width = w
                     
                     if(w >= first_row_width-100 and w <= first_row_width+100 and first_row_width > 0):
-                        amount_of_row = amount_of_row + 1
+                        amount_of_row = amount_of_row + 1    
                         row_cell.append(self.binary_image[y:y+h, x:x+w])
         
                         # if(self.debug):
