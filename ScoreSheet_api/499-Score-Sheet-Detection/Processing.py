@@ -1,137 +1,134 @@
-import sys 
 import cv2
 import numpy as np
-from numpy.lib.type_check import imag
+import math
 import Utility
 
 
-def get_adaptive_binary_image(rgb_image,debug=False):
-    # 1. convert gray image
-    gray_img = cv2.cvtColor(rgb_image, cv2.COLOR_BGR2GRAY)
-    if (debug):
-        Utility.showImage(gray_img,'gray image')
+# class BinaryImage:
+
+#     def __init__(self, image, debug=False):
+#         self.debug = debug
+#         self.rgb_image = image
+
+#     def getBinaryImage(self):
+#         # 1. convert gray image
+#         gray_img = cv2.cvtColor(self.rgb_image, cv2.COLOR_BGR2GRAY)
+#         if (self.debug):
+#             Utility.showImage(gray_img,'gray image')
         
-    # 2. remove shadow
-    dilated_img = cv2.dilate(gray_img, np.ones((7,7), np.uint8))
-    bg_img = cv2.medianBlur(dilated_img, 99)
-    diff_img = 255 - cv2.absdiff(gray_img, bg_img)
-    norm_img = diff_img.copy()
-    cv2.normalize(diff_img, norm_img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
-    if(debug):
-        Utility.showImage(diff_img, 'remove shadow')
+#         # 2. remove shadow
+#         dilated_img = cv2.dilate(gray_img, np.ones((7,7), np.uint8))
+#         bg_img = cv2.medianBlur(dilated_img, 99)
+#         diff_img = 255 - cv2.absdiff(gray_img, bg_img)
+#         norm_img = diff_img.copy()
+#         cv2.normalize(diff_img, norm_img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8UC1)
+#         if(self.debug):
+#             Utility.showImage(diff_img, 'remove shadow')
 
-    # 3. convert 1-channel image (binary image)
-    bilateral = cv2.bilateralFilter(gray_img, 11, 40, 40)
-    blur = cv2.GaussianBlur(bilateral,(5,5),0)
-    thresh_img = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 35, 10)
+#         # 3. convert 1-channel image (binary image)
+#         bilateral = cv2.bilateralFilter(gray_img, 11, 40, 40)
+#         blur = cv2.GaussianBlur(bilateral,(5,5),0)
+#         thresh_img = cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 35, 10)
 
-    if(debug):
-        # Utility.showImage(bilateral, 'bilateral image')
-        # Utility.showImage(blur, 'blur')
-        Utility.showImage(thresh_img, 'thresholding (binary image)')
+#         if(self.debug):
+#             # Utility.showImage(bilateral, 'bilateral image')
+#             # Utility.showImage(blur, 'blur')
+#             Utility.showImage(thresh_img, 'thresholding (binary image)')
         
-    return thresh_img
+#         return  thresh_img
 
 
+class CellSheets:
 
-def contours(binary_image, mode="RETR_EXTERNAL"):
-    if mode == "RETR_EXTERNAL":
-        contours, _ = cv2.findContours(binary_image , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    elif mode == "RETR_LIST":
-        contours, _ = cv2.findContours(binary_image , cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    elif mode == "RETR_TREE":
-        contours, _ = cv2.findContours(binary_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    def __init__(self, img, binaryImage, debug=False, max_cols=20):
+        self.debug = debug
+        self.original_image = img
+        self.binary_image = binaryImage  
+        self.min_width_cell =  self.binary_image.shape[1]/max_cols
+        self.max_cols = max_cols    
+
+    def processing(self):
+        ''' 
+            - POC Issue sorted contours -
+
+            [/] 1. get external cell by using external contouring
+            [/] 2. get rows by using contouring
+            [ ] 3. order row and colum of cell
+            [ ] 4. predict & mapping data structure 
+                    : identify three part
+                        - Text
+                        - Number Text
+                        - Handwritten (Model)
+        '''
+        datas = dict()
+        contours, _ = Utility.contours(self.binary_image)
+        binary_external_cell, rgb_external_cell = self.getExternalCell(contours)
+        external_cell_rows = self.boundingRows(binary_external_cell, rgb_external_cell)
+
+        if(self.debug):
+            Utility.showImage(self.binary_image, "orginal binary image")
+            Utility.showImage(binary_external_cell, "number of row : {0}".format(len(external_cell_rows)-1))
+            Utility.showImage(rgb_external_cell, "number of row : {0}".format(len(external_cell_rows)-1))
+
+        return datas
+
+    def isSquareBox(self, approx):
+        return len(approx) == 4
+
+    def isCellBox(self, approx, width):
+        return len(approx) == 4 and (width > self.min_width_cell)
+    
+    def getExternalCell(self, contours, buffer=0):
+        binary_external_cells = []
+        rgb_external_cells = []
+        for cnt in contours:
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
+            x, y, w, h = cv2.boundingRect(approx)
+
+            if(self.isSquareBox(approx) and self.isCellBox(approx,w)):    
+                bi_img = self.binary_image[y-buffer:y+h+buffer, x-buffer:x+w+buffer]
+                rgb_img = self.original_image[y-buffer:y+h+buffer, x-buffer:x+w+buffer]
+                binary_external_cells.append(bi_img)
+                rgb_external_cells.append(rgb_img)
         
-    return contours, _
+        return binary_external_cells[0], rgb_external_cells[0]
 
+    def boundingRows(self, binary_img, rgb_img):
+        # Detect horizontal lines
+        result = rgb_img.copy()
+        horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40,1))
+        detect_horizontal = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
+        contours, _ = Utility.contours(detect_horizontal)
+        contours, _ = Utility.sortContours(contours,method="top-to-bottom")
+        i = 0
+        _, pre_y, _, _ = Utility.getAreaByContour(contours[0])
+        rows = []
+        for c in contours:
+            x, y, _, _ = Utility.getAreaByContour(c)
+            print(y)
+            if(i > 0):
+                start_pox_y = pre_y
+                end_pos_y = y
+                row = rgb_img[start_pox_y:end_pos_y,:]
+                if(self.debug):
+                    Utility.showImage(row, "row {0}".format(i))
+                rows.append(row)
+            if(self.debug):
+                cv2.putText(result, "{0}".format(i), (x,y),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,0,0),2,cv2.LINE_AA)
+                cv2.drawContours(result, [c], -1, (36,255,12), 2)
+            i += 1
+            pre_y = y
 
-
-def sortContours(contours, method="left-to-right", debug=False):
-    reverse = False
-    i = 0
-    if method == "right-to-left" or method == "bottom-to-top":
-        reverse = True
-            
-    if method == "top-to-bottom" or method == "bottom-to-top":
-        i = 1
-
-    boundingBoxes = [cv2.boundingRect(c) for c in contours]
-    
-    (cnts_, boundingBoxes_) = zip(*sorted(zip(contours, boundingBoxes),
-    key=lambda b:b[1][i], reverse=reverse))
-            
-    return (cnts_, boundingBoxes_)
-
-def fourCornersSort(pts):
-    diff = np.diff(pts, axis=1)
-    summ = pts.sum(axis=1)
-    return np.array([pts[np.argmin(summ)],
-                     pts[np.argmax(diff)],
-                     pts[np.argmax(summ)],
-                     pts[np.argmin(diff)]])
-
-
-def contourOffset(cnt, offset):
-
-    cnt += offset
-    cnt[cnt < 0] = 0
-    return cnt
-
-def biggerCountour(contours):
-    biggest = np.array([])
-    max_area = 0
-    for cnt in contours:
-        area = cv2.contourArea(cnt)
-        if area > 5000:
-            peri = cv2.arcLength(cnt,True)
-            approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
-            
-            if area > max_area and len(approx) == 4:
-                biggest = approx
-                max_area = area
-    return biggest, max_area
-
-def reOrder(myPoints):
-    myPoints = myPoints.reshape((4,2))
-    myPointsNew = np.zeros((4,1,2),np.int32)
-    add = myPoints.sum(1)
-    
-    myPointsNew[0] = myPoints[np.argmin(add)]
-    myPointsNew[3] = myPoints[np.argmax(add)]
-    
-    diff =np.diff(myPoints, axis=1)
-    myPointsNew[1] = myPoints[np.argmin(diff)]
-    myPointsNew[2] = myPoints[np.argmax(diff)]
-    
-    return myPointsNew
-
-def getPerspective(image, bi_img, debug=False):
+        if(self.debug):
+            Utility.showImage(result)
         
-    contours, _ = cv2.findContours(bi_img , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    biggest, maxArea = biggerCountour(contours)
-    heightImg, widthImg  = 500,800
-    
-    
-    if biggest.size != 0:
-        _, _, w, h = cv2.boundingRect(biggest)
-        widthImg = w
-        heightImg = h
-        # widthImg = biggest[0][len(biggest)-1][1] - biggest[0][0][1]
-        # heightImg = biggest[0][len(biggest)-1][0] - biggest[0][0][0]
-        
-        if(debug):
-            print("{0} : {1}".format(widthImg,heightImg))
-            
-        biggest = reOrder(biggest) 
-        pts1 = np.float32(biggest)
-        pts2 = np.float32([[0,0],[widthImg,0],[0,heightImg],[widthImg,heightImg]])
-        matrix = cv2.getPerspectiveTransform(pts1,pts2)
-        imgWrapColored = cv2.warpPerspective(bi_img, matrix, (widthImg, heightImg))
-    
-    if(debug):
-        cv2.drawContours(image, biggest, -1, (0,255,0), 100)
-        Utility.showImage(image, 'contour image')
-        Utility.showImage(imgWrapColored, 'imgWrapColored')
-        
-    return imgWrapColored
+        return rows
 
+    
+
+
+
+
+
+    
