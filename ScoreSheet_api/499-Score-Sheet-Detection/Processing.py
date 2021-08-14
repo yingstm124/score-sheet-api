@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 import Utility
-
+from keras.models import load_model
 
 class Sheets:
 
@@ -11,7 +11,7 @@ class Sheets:
         self.original_image = img
         self.binary_image = binaryImage  
         self.min_width_cell =  self.binary_image.shape[1]/max_cols
-        self.max_cols = max_cols    
+        self.max_cols = max_cols  
 
     def processing(self):
         ''' 
@@ -52,11 +52,12 @@ class Sheets:
                 if(self.isDigitBox(i,j)):
                     digits = self.boundingDigits(binary_cols[j],rgb_cols[j], is_student_cell)
                     for d in digits:
-                        digit_28_resized = Utility.resize28Image(d)
-
+                        digit_28_resized = 255 - Utility.resize28Image(d)
+        
                         if(self.debug):
-                            Utility.showImage(digit_28_resized,"28 x 28 digit size")
+                            Utility.showImage(digit_28_resized,"28 x 28 digit size :")
                         # predict digit
+                        
                 if(self.debug):
                     Utility.showImage(rgb_cols[j],"show row{0} col {1}".format(i,j))
         
