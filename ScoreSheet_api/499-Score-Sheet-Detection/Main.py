@@ -13,10 +13,9 @@ if __name__ == '__main__':
     gray_img = Utility.convertBgr2GrayImage(img)
     img = Utility.removeNoiseAndShadow(gray_img)
     binary_img = Utility.convertGray2BinaryImage(img)
-    #binary_image = Processing.getPerspective(img, binary_image)
 
     # 3. image processing & segmentation & prediction  
-    datas = CellSheets(img, binary_img, True).processing()
+    datas = Sheets(img, binary_img, True).processing()
     
     # 4. mapping data for sending to client
 

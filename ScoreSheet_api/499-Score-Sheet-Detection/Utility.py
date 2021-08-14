@@ -16,7 +16,7 @@ def resizeImage(img,width, debug=False):
         showImage(resize_image, 'resized image')
     return resize_image
 
-def resize28Image(img, debug=False,expect_width=28, expect_height=28):
+def resize28Image(img, debug=False,expect_width=22, expect_height=22):
     height = int(img.shape[0])
     width = int(img.shape[1])
     min_ = min(width,height)
