@@ -12,6 +12,7 @@ class Sheets:
         self.binary_image = binaryImage  
         self.min_width_cell =  self.binary_image.shape[1]/max_cols
         self.max_cols = max_cols  
+        self.model = load_model("./models/mnist.h5")
 
     def processing(self):
         ''' 
@@ -26,7 +27,12 @@ class Sheets:
                         - Number Text
                         - Handwritten (Model)
         '''
-        datas = dict()
+        datas = {
+            "studentID": str(),
+            "pageNo":[],
+            "fullScore": [],
+            "score":[]
+        }
         contours, _ = Utility.contours(self.binary_image)
         binary_external_cell, rgb_external_cell = self.getExternalCell(contours,10)
         bi_rows, rgb_rows = self.boundingRows(binary_external_cell, rgb_external_cell)
@@ -38,28 +44,41 @@ class Sheets:
 
         # predict inside of row
         # loop rows
-        for i in range(len(rgb_rows)):
+        for row in range(len(rgb_rows)):
             if(self.debug):
-                Utility.showImage(rgb_rows[i], "show row {0}".format(i))
-            binary_cols, rgb_cols = self.boundingCols(bi_rows[i],rgb_rows[i],5)
+                Utility.showImage(rgb_rows[row], "show row {0}".format(row))
+            binary_cols, rgb_cols = self.boundingCols(bi_rows[row],rgb_rows[row],5)
             # loop cols
-            for j in range(len(rgb_cols)):
-                if(i == 0):
+            for col in range(len(rgb_cols)):
+                
+                if(row == 0):
                     is_student_cell = True
                 else:
                     is_student_cell = False
+
                 # segment digit and predict
-                if(self.isDigitBox(i,j)):
-                    digits = self.boundingDigits(binary_cols[j],rgb_cols[j], is_student_cell)
-                    for d in digits:
-                        digit_28_resized = 255 - Utility.resize28Image(d)
+                if(self.isDigitBox(row,col)):
+                    digits = self.boundingDigits(binary_cols[col],rgb_cols[col], is_student_cell)
+                    # loop digits in cell
+                    result_digit = 0
+                    for index, d in enumerate(digits):
+                        digit_28_resized = Utility.resize28Image(d)
+                        new_result_digit, accuracy = self.predict(digit_28_resized)
+                        # predict digit
+                        if(is_student_cell):
+                            result_digit = int(str(result_digit) + str(new_result_digit))
+                        else:
+                            result_digit = result_digit + new_result_digit*math.pow(10,len(digits)-(index+1))
         
                         if(self.debug):
-                            Utility.showImage(digit_28_resized,"28 x 28 digit size :")
-                        # predict digit
-                        
+                            Utility.showImage(digit_28_resized,"28 x 28 digit size : {0} : {1}".format(result_digit, accuracy))
+                    
+                    if(self.debug):
+                        print(result_digit)
+                
+                    
                 if(self.debug):
-                    Utility.showImage(rgb_cols[j],"show row{0} col {1}".format(i,j))
+                    Utility.showImage(rgb_cols[col],"show row{0} col {1}".format(row,col))
         
         return datas
 
@@ -189,6 +208,11 @@ class Sheets:
 
         return bi_digits
 
+    def predict(self, img):
+        img = img.reshape(1,28,28,1)
+        img = img/255
+        res = self.model.predict([img])[0]
+        return np.argmax(res) , max(res)
 
 
     
