@@ -15,14 +15,3 @@ if __name__ == '__main__':
 
     # 3. image processing & segmentation & prediction  
     datas = Sheets(img, binary_img, True).processing()
-    
-    # 4. mapping data for sending to client
-
-    # cellBoxs = cell_sheets.scoreSheet
-    # amount_of_row = cell_sheets.amountOfRow
-    # print("amount of row : ",amount_of_row)
-    # print(cellBoxs) 
-    
-    
-
-    

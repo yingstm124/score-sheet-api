@@ -73,13 +73,17 @@ class Sheets:
                         if(self.debug):
                             Utility.showImage(digit_28_resized,"28 x 28 digit size : {0} : {1}".format(result_digit, accuracy))
                     
-                    if(self.debug):
-                        print(result_digit)
-                
+                    if(is_student_cell):
+                        datas["studentID"] = result_digit
+                    else:
+                        datas["score"].append(result_digit)
                     
                 if(self.debug):
                     Utility.showImage(rgb_cols[col],"show row{0} col {1}".format(row,col))
         
+        if(self.debug):
+            print(datas)
+            
         return datas
 
     def isSquareBox(self, approx):
