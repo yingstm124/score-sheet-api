@@ -1,6 +1,21 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import glob
+
+def loadImages(file_paths):
+    print(file_paths)
+    ext = ['png', 'jpg']   
+    files = []
+    [files.extend(glob.glob(file_paths + '*.' + e)) for e in ext]
+    images = [cv2.imread(file) for file in files]
+    # print(len(images))
+    # for img in images:
+    #     showImage(img)
+
+    return images
+    
 
 def showImage(img, title=''):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
