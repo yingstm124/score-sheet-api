@@ -30,15 +30,15 @@ expect_results = [
     {'studentID': '590510137', 'pageNo': [], 'fullScore': [], 'score': [5.0, 7.0, 8.0, 19.0]}
 ]
 
-# 2. expect result
+# 2. run result
 for i in range(len(images)):
     img = images[i]
-    # 2. convert to binary image
+    # 2.1 convert to binary image
     gray_img = Utility.convertBgr2GrayImage(img)
     img = Utility.removeNoiseAndShadow(gray_img)
     binary_img = Utility.convertGray2BinaryImage(img)
 
-    # 3. image processing & segmentation & prediction  
+    # 2.2 test image processing & segmentation & prediction  
     print('----------------test image {0}------------------'.format(i+1))
     datas = Sheets(img, binary_img).processing()
     print("==> student id")
@@ -46,6 +46,4 @@ for i in range(len(images)):
     print("==> score")
     checkScores(expect_results[i]['score'],datas['score'])
 
-# 3. run sheet process
-
-# 4. report
+# 3. report
