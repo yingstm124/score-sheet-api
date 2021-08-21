@@ -4,6 +4,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
+import os
 
 # the data, split between train and test sets
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -28,7 +29,7 @@ print(x_test.shape[0], 'test samples')
 
 batch_size = 128
 num_classes = 10
-epochs = 10
+epochs = 50
 
 model = Sequential()
 model.add(Conv2D(32, kernel_size=(5, 5),activation='relu',input_shape=input_shape))
@@ -51,6 +52,6 @@ score = model.evaluate(x_test, y_test, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
-model.save('mnist.h5')
+model.save(os.path.join("models",'mnist.h5'))
 print("Saving the model as mnist.h5")
 

@@ -3,6 +3,7 @@ import numpy as np
 import math
 import Utility
 from keras.models import load_model
+import os
 
 class Sheets:
 
@@ -12,7 +13,9 @@ class Sheets:
         self.binary_image = binaryImage  
         self.min_width_cell =  self.binary_image.shape[1]/max_cols
         self.max_cols = max_cols  
-        self.model = load_model("./models/mnist.h5")
+        root_path = os.path.dirname(__file__)
+        model_path = 'models/mnist.h5'
+        self.model = load_model(os.path.join(root_path,model_path))
 
     def processing(self):
         ''' 
