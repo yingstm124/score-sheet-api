@@ -31,7 +31,11 @@ def getExpectResults(course):
         ]
     elif (course == "201251"):
         return [
-            
+            {'studentID': '590510137', 'pageNo': [], 'fullScore': [], 'score': [5.0, 5.0, 4.0, 24.0]},
+            {'studentID': '590510101', 'pageNo': [], 'fullScore': [], 'score': [7.0, 7.0, 4.0, 31.0]},
+            {'studentID': '590510102', 'pageNo': [], 'fullScore': [], 'score': [3.0, 8.0, 4.0, 27.0]},
+            {'studentID': '590510103', 'pageNo': [], 'fullScore': [], 'score': [7.0, 7.0, 9.0, 43.0]},
+            {'studentID': '600510111', 'pageNo': [], 'fullScore': [], 'score': [1.0, 1.0, 1.0, 3.0]},
         ]
 
 def report(answer, result):
@@ -41,7 +45,6 @@ def report(answer, result):
         print("[X] Incorrect! answer = {0} , result = {1} ".format(answer, result))
 
 def checkStudentID(ans_std, std):
-
     for i in range(len(ans_std)):
         if(i < len(str(std))):
             report(ans_std[i], str(std)[i])
@@ -53,7 +56,7 @@ def checkScores(ans_scores, scores):
 
 # 1. load images in floder
 root_path = os.path.dirname(__file__)
-course_test_selected = "201211"
+course_test_selected = "201251"
 img_folders = "asset/inputs/{0}/".format(course_test_selected)
 images = Utility.loadImages(os.path.join(root_path,img_folders))
 expect_results = getExpectResults(course_test_selected)
