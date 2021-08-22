@@ -96,6 +96,8 @@ def contours(binary_image, mode="RETR_EXTERNAL"):
     return contours, _
 
 def sortContours(contours, method="left-to-right", debug=False):
+    if(len(contours) < 1):
+        return []
     reverse = False
     i = 0
     if method == "right-to-left" or method == "bottom-to-top":

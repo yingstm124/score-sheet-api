@@ -38,27 +38,28 @@ class Sheets:
         }
         contours, _ = Utility.contours(self.binary_image)
         binary_external_cell, rgb_external_cell = self.getExternalCell(contours,10)
-        bi_rows, rgb_rows = self.boundingRows(binary_external_cell, rgb_external_cell)
+        bi_rows, rgb_rows = self.boundingRows(binary_external_cell, rgb_external_cell,buffer=85)
 
         if(self.debug):
             Utility.showImage(self.binary_image, "orginal binary image")
-            Utility.showImage(binary_external_cell, "number of row : {0}".format(len(bi_rows)-1))
-            Utility.showImage(rgb_external_cell, "number of row : {0}".format(len(bi_rows)-1))
+            Utility.showImage(binary_external_cell, "number of row : {0}".format(len(bi_rows)))
+            Utility.showImage(rgb_external_cell, "number of row : {0}".format(len(bi_rows)))
 
         # predict inside of row
         # loop rows
         for row in range(len(rgb_rows)):
-            if(self.debug):
+        
+            if(self.debug and len(rgb_rows[row]) > 0):
                 Utility.showImage(rgb_rows[row], "show row {0}".format(row))
-            binary_cols, rgb_cols = self.boundingCols(bi_rows[row],rgb_rows[row],5)
+            binary_cols, rgb_cols = self.boundingCols(bi_rows[row],rgb_rows[row],15)
             # loop cols
+            if(row == 0):
+                is_student_cell = True
+            else:
+                is_student_cell = False
+            
             for col in range(len(rgb_cols)):
                 
-                if(row == 0):
-                    is_student_cell = True
-                else:
-                    is_student_cell = False
-
                 # segment digit and predict
                 if(self.isDigitBox(row,col)):
                     digits = self.boundingDigits(binary_cols[col],rgb_cols[col], is_student_cell)
@@ -80,13 +81,18 @@ class Sheets:
                         datas["studentID"] = result_digit
                     else:
                         datas["score"].append(result_digit)
-                    
-                if(self.debug):
-                    Utility.showImage(rgb_cols[col],"show row{0} col {1}".format(row,col))
-        
+ 
+                if(self.debug and len(rgb_cols[col]) > 0 and row not in [1,2]):
+                    w = rgb_cols[col].shape[1]
+                    h = rgb_cols[col].shape[0]
+                    Utility.showImage(rgb_cols[col],"show row {0} col {1} : width x height = {2} x {3}".format(row,col,w,h))
+
         if(self.debug):
             print(datas)
-            
+
+        if(datas["studentID"] == ""):
+            datas["studentID"] = 0
+
         return datas
 
     def isSquareBox(self, approx):
@@ -119,7 +125,9 @@ class Sheets:
         
         return binary_external_cells[0], rgb_external_cells[0]
 
-    def boundingRows(self, binary_img, rgb_img=None, debug=False):
+    def boundingRows(self, binary_img, rgb_img=None,buffer=0, debug=False):
+        if(len(binary_img) < 1 and len(rgb_img) < 1):
+            return [],[]
         # Detect horizontal lines
         horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40,1))
         detect_horizontal = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
@@ -139,8 +147,11 @@ class Sheets:
         for c in contours:
             x, y, _, _ = Utility.getAreaByContour(c)
             if(i > 0):
-                start_pox_y = pre_y - 10
-                end_pos_y = y + 20
+                if(i != 1):
+                    start_pox_y = pre_y - buffer
+                else:
+                    start_pox_y = 0
+                end_pos_y = y + buffer
                 b_r = binary_img[start_pox_y:end_pos_y,:]
                 rgb_r = rgb_img[start_pox_y:end_pos_y,:]
                 if(debug):
@@ -161,6 +172,8 @@ class Sheets:
         return bi_rows, rgb_row
 
     def boundingCols(self, binary_img, rgb_img, buffer=0,debug=False):
+        if(len(binary_img) < 1 and len(rgb_img) < 1):
+            return [], []
         # segment col
         contours, _ = Utility.contours(binary_img, mode="RETR_TREE")
         contours, _ = Utility.sortContours(contours,method="left-to-right")
@@ -173,7 +186,7 @@ class Sheets:
             approx = cv2.approxPolyDP(c, 0.02*peri, True)
             x, y, w, h = Utility.getAreaByContour(c)
 
-            if(self.isSquareBox(approx) and w < max_width - 100):    
+            if(self.isSquareBox(approx) and w < max_width - 100 and w > 100):    
                 rgb_col = rgb_img[y+buffer:y+h-buffer, x+buffer:x+w-buffer]
                 bi_col = binary_img[y+buffer:y+h-buffer, x+buffer:x+w-buffer]
                 bi_cols.append(bi_col)
@@ -187,17 +200,19 @@ class Sheets:
         return bi_cols, rgb_cols
 
     def boundingDigits(self, binary_img, rgb_img, is_student_cell=False,debug=False):
-        
+
         contours, _ = Utility.contours(binary_img)
+        if(len(contours) == 0):
+            return []
         contours, _ = Utility.sortContours(contours,method="left-to-right")
 
         cell_width = binary_img.shape[1]
         cell_height = binary_img.shape[0]
         if(is_student_cell):
-            max_digit = 50
+            max_digit = 60
         else:
             max_digit = 3
-        
+ 
         bi_digits = []
         for c in contours:
             peri = cv2.arcLength(c, True)
@@ -205,13 +220,13 @@ class Sheets:
             x, y, w, h = Utility.getAreaByContour(c)
             min_width = 10
             min_height = cell_height/4
+            digit = binary_img[y:y+h,x:x+w]
 
             if(self.isDigit(w,h,min_width,min_height)):
-                digit = binary_img[y:y+h,x:x+w]
                 bi_digits.append(digit)
-
                 if(debug):
                     Utility.showImage(digit, "digit")
+
 
         return bi_digits
 
