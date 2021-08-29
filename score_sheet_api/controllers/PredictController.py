@@ -18,7 +18,8 @@ cursor = getDb().cursor()
 
 @app.route('/predict', methods=['POST'])
 def predict():
-
+    
+    assignment_id = request.args.get('assignmentId')
     if(request.method == "POST"):
 
         try:
@@ -33,8 +34,10 @@ def predict():
                 gray_image = Utility.convertBgr2GrayImage(image)
                 binary_image = Utility.convertGray2BinaryImage(gray_image)
      
-                datas = Processing.Sheets(image, binary_image, True).processing()
+                datas = Processing.Sheets(image, binary_image).processing()
                 print(datas)
+                print(datas)
+                return datas
                 # 2. fetch data for validation 
                 # 2.1 validate student id of assignment  
         except Exception as err:

@@ -31,10 +31,11 @@ class Sheets:
                         - Handwritten (Model)
         '''
         datas = {
-            "studentID": str(),
+            "StudentId": str(),
             "pageNo":[],
             "fullScore": [],
-            "score":[]
+            "Scores":[],
+            "Message":""
         }
         contours, _ = Utility.contours(self.binary_image)
         binary_external_cell, rgb_external_cell = self.getExternalCell(contours,10)
@@ -78,9 +79,9 @@ class Sheets:
                             Utility.showImage(digit_28_resized,"28 x 28 digit size : {0} : {1}".format(result_digit, accuracy))
                     
                     if(is_student_cell):
-                        datas["studentID"] = result_digit
+                        datas["StudentId"] = result_digit
                     else:
-                        datas["score"].append(result_digit)
+                        datas["Scores"].append(result_digit)
  
                 if(self.debug and len(rgb_cols[col]) > 0 and row not in [1,2]):
                     w = rgb_cols[col].shape[1]
@@ -90,8 +91,8 @@ class Sheets:
         if(self.debug):
             print(datas)
 
-        if(datas["studentID"] == ""):
-            datas["studentID"] = 0
+        if(datas["StudentId"] == ""):
+            datas["StudentId"] = 0
 
         return datas
 

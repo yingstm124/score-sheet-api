@@ -142,7 +142,7 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                PreviewImage(getStudentAssignment: _getStudentAssignment,image: _imageFileList![0])
+                                PreviewImage(getStudentAssignment: _getStudentAssignment, assignment: assignment,image: _imageFileList![0])
                         )
                     );
                   }
@@ -158,7 +158,7 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                PreviewImage(getStudentAssignment: _getStudentAssignment,image: _imageFileList![0])
+                                PreviewImage(getStudentAssignment: _getStudentAssignment, assignment: assignment,image: _imageFileList![0])
                         )
                     );
                   }
