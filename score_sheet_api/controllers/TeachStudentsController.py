@@ -1,7 +1,7 @@
-from ScoreSheet_api import app
+from score_sheet_api import app
 from flask import Flask, request, jsonify, json
-from ScoreSheet_api.config.database import getDb
-from ScoreSheet_api.helpers.DbUtillity import Convert_to_Json, Handle_error
+from score_sheet_api.config.database import getDb
+from score_sheet_api.helpers.DbUtillity import Convert_to_Json, Handle_error
 
 import pymysql
 
