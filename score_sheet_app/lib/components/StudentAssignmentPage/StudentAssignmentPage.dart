@@ -57,21 +57,22 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
     _getStudentAssignment();
   }
 
-
   Future _onImageButtonPressed(ImageSource source,
       {BuildContext? context}) async {
-    try {
-      final pickedFile = await _picker.pickImage(
-          source: source
-      );
-      setState(() {
-        _imageFile = pickedFile;
-      });
-    } catch (e) {
-      setState(() {
-        _pickImageError = e;
-      });
-    }
+      try {
+
+        final pickedFile = await _picker.pickImage(
+            source: source
+        );
+        setState(() {
+          _imageFile = pickedFile;
+        });
+      } catch (e) {
+        setState(() {
+          _pickImageError = e;
+        });
+      }
+
   }
 
   void _getStudentAssignment() async {
@@ -81,7 +82,6 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
       _studentAssignments = results;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
