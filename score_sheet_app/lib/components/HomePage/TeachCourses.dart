@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:score_sheet_app/components/HomePage/TeachCourseDetail.dart';
@@ -33,8 +31,8 @@ class _TeachCourses extends State<TeachCourses> {
     return ListView.builder(
         itemCount: _teachCourses.length,
         itemBuilder: (context, index) {
-          final teach_course = _teachCourses[index];
-          return TeachCourseDetail(teachcourse: teach_course);
+          final teachCourse = _teachCourses[index];
+          return TeachCourseDetail(teachcourse: teachCourse);
         });
   }
 }

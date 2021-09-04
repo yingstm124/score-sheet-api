@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:io' as Io;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:score_sheet_app/apis/PredictionApi.dart';
 import 'package:score_sheet_app/apis/StudentAssignmentApi.dart';
 import 'package:score_sheet_app/components/CourseHeader/CourseHeader.dart';
 import 'package:score_sheet_app/components/ExpandableFabCustom/ExpandableFab.dart';
 import 'package:score_sheet_app/components/StudentAssignmentPage/PreviewImage/PreviewImage.dart';
 import 'package:score_sheet_app/helpers/BaseApi.dart';
 import 'package:score_sheet_app/models/Assignment.dart';
+import 'package:score_sheet_app/models/PredictResult.dart';
 import 'package:score_sheet_app/models/StudentAssignment.dart';
 import 'package:score_sheet_app/models/TeachCourse.dart';
 
@@ -138,11 +141,11 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                   print('uploade image');
                   await _onImageButtonPressed(ImageSource.gallery, context: context);
                   if(_imageFileList != null){
-                    Navigator.push(
+                    await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                PreviewImage(getStudentAssignment: _getStudentAssignment, assignment: assignment,image: _imageFileList![0])
+                                PreviewImage(getStudentAssignment: _getStudentAssignment, assignment: assignment,image: _imageFileList![0], teachCourse: teachCourse,)
                         )
                     );
                   }
@@ -154,13 +157,12 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                   print('camera');
                   await _onImageButtonPressed(ImageSource.camera, context: context);
                   if(_imageFileList != null){
-                    Navigator.push(
+                    await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                PreviewImage(getStudentAssignment: _getStudentAssignment, assignment: assignment,image: _imageFileList![0])
-                        )
-                    );
+                                PreviewImage(getStudentAssignment: _getStudentAssignment, assignment: assignment,image: _imageFileList![0], teachCourse: teachCourse,)
+                        ));
                   }
                 },
               )
