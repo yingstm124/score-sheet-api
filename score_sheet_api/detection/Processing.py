@@ -35,7 +35,9 @@ class Sheets:
             "pageNo":[],
             "fullScore": [],
             "Scores":[],
-            "Message":""
+            "Message":"",
+            "OldStudentId":str(),
+            "OldScores":[]
         }
         contours, _ = Utility.contours(self.binary_image)
         binary_external_cell, rgb_external_cell = self.getExternalCell(contours,10)
