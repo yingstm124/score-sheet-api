@@ -9,8 +9,8 @@ class PredictApi {
 
   static final String _baseUrl = BaseApi.getBaseAPI();
 
-  static Future<PredictResult> predict(int _assignmentId, File _image) async {
-    String url = _baseUrl + '/predict?assignmentId=${_assignmentId}';
+  static Future<PredictResult> predict(int _assignmentId, int _teachCouseId, File _image) async {
+    String url = _baseUrl + '/predict?assignmentId=${_assignmentId}&teachCourseId=${_teachCouseId}';
     final headers = { "Content-Type": "multipart/form-data" };
     EasyLoading.show(status: 'loading..');
     final request = http.MultipartRequest(

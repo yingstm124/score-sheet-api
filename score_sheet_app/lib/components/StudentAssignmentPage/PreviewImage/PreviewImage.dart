@@ -54,7 +54,7 @@ class _PreviewImage extends State<PreviewImage> {
 
   void predictImage() async {
     final img = Io.File(image!.path);
-    final predict = PredictApi.predict(assignment.AssignmentId, img)
+    final predict = PredictApi.predict(assignment.AssignmentId, teachCourse.TeachCourseId, img)
         .then((value) => {
           setState(() {
           _predictResult = value;
@@ -96,6 +96,7 @@ class _PreviewImage extends State<PreviewImage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
+                    Text('${_predictResult.Message}'),
                     Text('${assignment.AssignmentName}'),
                     Text('${teachCourse.CourseName} (${teachCourse.CourseId})'),
                     Text('Semester ${teachCourse.Term}/${teachCourse.Year}')
