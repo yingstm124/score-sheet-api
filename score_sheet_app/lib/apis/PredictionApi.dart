@@ -21,11 +21,7 @@ class PredictApi {
         'image', _image.readAsBytes().asStream(), _image.lengthSync(),
         filename: _image.path.split('/').last
     ));
-    PredictResult answer = PredictResult(
-        StudentId: 1,
-        Scores: [],
-        Message: ""
-    );
+
     request.headers.addAll(headers);
     final res = await request.send();
 
@@ -33,19 +29,15 @@ class PredictApi {
       EasyLoading.dismiss();
       final body = await res.stream.bytesToString();
       final dynamic result = jsonDecode(body);
-      answer = PredictResult.fromJson(result);
+      PredictResult answer = PredictResult.fromJson(result);
+      print("Teach Student Id : ${answer.TeachStudentId}");
+      return answer;
     }
     else {
       EasyLoading.showError('Can not Detect');
       EasyLoading.dismiss();
       throw Exception("Failed !");
     }
-
-    print("--> ${answer.StudentId}");
-    answer.Scores.forEach((element) {
-      print("--> ${element}");
-    });
-    return answer;
 
   }
 
