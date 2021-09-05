@@ -83,7 +83,7 @@ class Sheets:
                     if(is_student_cell):
                         datas["StudentId"] = result_digit
                     else:
-                        datas["Scores"].append(result_digit)
+                        datas["Scores"].append(int(result_digit))
  
                 if(self.debug and len(rgb_cols[col]) > 0 and row not in [1,2]):
                     w = rgb_cols[col].shape[1]
