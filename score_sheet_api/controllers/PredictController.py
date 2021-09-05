@@ -65,7 +65,7 @@ def predict():
                     cursor.execute(query)
                     res = cursor.fetchall()
                     if(len(res) == 0):
-                        return datas
+                         return datas
 
                     old_scores = []
                     for r in res:
