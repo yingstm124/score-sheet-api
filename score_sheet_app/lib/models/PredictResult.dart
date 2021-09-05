@@ -1,10 +1,10 @@
 class PredictResult {
-  int StudentId;
+  int? StudentId;
   List<dynamic> Scores;
   final String Message;
 
   PredictResult({
-    required this.StudentId,
+    this.StudentId,
     required this.Scores,
     required this.Message
   });
