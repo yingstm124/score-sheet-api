@@ -45,9 +45,6 @@ class _PreviewImage extends State<PreviewImage> {
 
   PredictResult _predictResult = new PredictResult(StudentId: 0, Scores: [], Message: "");
 
-  final _studentIdController = TextEditingController();
-  final _scoreController = TextEditingController();
-
   _PreviewImage({
     required this.getStudentAssignment,
     this.image,
@@ -92,17 +89,9 @@ class _PreviewImage extends State<PreviewImage> {
           new TextFormField(
             keyboardType: TextInputType.number,
             decoration: InputDecoration(labelText:  "Score ${i+1} : ${scores[i].toString()}"),
-            validator: (value){
-              if(value == null || value.isEmpty){
-                return 'Please enter assignment name';
-              }
-              return null;
-            },
+            initialValue: "${_predictResult.Scores[i].toString()}",
             onChanged: (String value) async {
-              if(value != null){
-                print(i);
-                setScores(int.parse(value),i);
-              }
+              setScores(int.parse(value),i);
             },
           ));
     }
@@ -137,10 +126,10 @@ class _PreviewImage extends State<PreviewImage> {
                 ],
               ),
               Image.file(File(image!.path)),
-              TextField(
-                controller: _studentIdController,
+              TextFormField(
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(labelText:  "Student Id : ${_predictResult.StudentId.toString()}"),
+                initialValue: "${_predictResult.StudentId.toString()}",
                 onChanged: (String value) async {
                   if(value != null){
                     setStudentId(int.parse(value));
@@ -160,9 +149,9 @@ class _PreviewImage extends State<PreviewImage> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      print('Submit');
-                      predictImage();
+                      print('Save As');
 
+                      // predictImage();
                       // final _saveImageSuccess = await StudentAssignmentApi.saveImage(2, _image);
                       // if(_saveImageSuccess){
                       //   print('save image success !!');
@@ -170,7 +159,7 @@ class _PreviewImage extends State<PreviewImage> {
                       //   Navigator.of(context).pop();
                       // }
                     },
-                    child: const Text('Submit'),
+                    child: const Text('Save As'),
                   ),
                 ],
               ),
