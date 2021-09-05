@@ -43,7 +43,8 @@ def predict():
                         "Scores": list
                         "Message": string,
                         "OldStudentId": int,
-                        "OldScores": list
+                        "OldScores": list,
+                        "TeachStudentId":int
                     }
                 '''
                 datas = Processing.Sheets(image, binary_image).processing()
@@ -52,18 +53,18 @@ def predict():
                 os.remove(pathImage)
 
                 # check Student ID
-                query = "select S.StudentId from students S inner join teachStudents TS on TS.StudentId = S.StudentId Where S.StudentId = {0} And TS.TeachCourseId = {1}".format(result_studentId,teachCourse_id)
+                query = "select S.StudentId, TS.TeachStudentId from students S inner join teachStudents TS on TS.StudentId = S.StudentId Where S.StudentId = {0} And TS.TeachCourseId = {1}".format(result_studentId,teachCourse_id)
                 cursor.execute(query)
                 res = cursor.fetchone()
 
                 if(res != None):
                     datas["Message"] = "Found Student"
+                    datas["TeachStudentId"] = res["TeachStudentId"]
                     found_student_id = res['StudentId']
                     query = "select SS.Score from studentscores SS inner join scores S on SS.ScoreId = S.ScoreId inner join assignments A on S.AssignmentId = A.AssignmentId Where S.AssignmentId = {0} And  A.AssignmentId = {1}".format(found_student_id,assignment_id)
                     cursor.execute(query)
                     res = cursor.fetchall()
-                    if(res == None):
-                        datas["Message"] = "Already detected"
+                    if(len(res) == 0):
                         return datas
 
                     old_scores = []

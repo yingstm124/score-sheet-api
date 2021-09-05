@@ -37,7 +37,8 @@ class Sheets:
             "Scores":[],
             "Message":"",
             "OldStudentId":str(),
-            "OldScores":[]
+            "OldScores":[],
+            "TeachStudentId": 0
         }
         contours, _ = Utility.contours(self.binary_image)
         binary_external_cell, rgb_external_cell = self.getExternalCell(contours,10)
