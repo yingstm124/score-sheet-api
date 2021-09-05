@@ -61,8 +61,23 @@ def addAssignment():
         fullScore = request.json['FullScore']
         
         try:
+            
+            query_select_teachstd = "SELECT TeachStudentId FROM TeachStudents WHERE TeachCourseId = {0}".format(teach_course_id)
+            cursor.execute(query_select_teachstd)
+            teach_stds = cursor.fetchall()
+
+            if(teach_stds == None):
+                return Handle_error(err, 500)  
+
             query = "INSERT INTO Assignments (TeachCourseId, FullScore, AssignmentName) VALUES (%s,%s,%s)"
             cursor.execute(query, (int(teach_course_id), int(fullScore), assignmentName))  
+            assignment_id = cursor.lastrowid
+            getDb().commit()
+
+            for teach_std in teach_stds:
+                query_update = "UPDATE StudentAssignments SET AssignmentId=%s WHERE TeachStudentId=%s"
+                cursor.execute(query_update,(assignment_id, teach_std["TeachStudentId"]))
+                getDb().commit()
             
             return jsonify(True), 200
         
