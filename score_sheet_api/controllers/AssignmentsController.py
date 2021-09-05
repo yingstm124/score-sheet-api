@@ -72,11 +72,10 @@ def addAssignment():
             query = "INSERT INTO Assignments (TeachCourseId, FullScore, AssignmentName) VALUES (%s,%s,%s)"
             cursor.execute(query, (int(teach_course_id), int(fullScore), assignmentName))  
             assignment_id = cursor.lastrowid
-            getDb().commit()
 
             for teach_std in teach_stds:
-                query_update = "UPDATE StudentAssignments SET AssignmentId=%s WHERE TeachStudentId=%s"
-                cursor.execute(query_update,(assignment_id, teach_std["TeachStudentId"]))
+                query_add = "INSERT INTO StudentAssignments (TeachStudentId, AssignmentId) VALUES (%s,%s)"
+                cursor.execute(query_add,(int(teach_std['TeachStudentId']),int(assignment_id)))
                 getDb().commit()
             
             return jsonify(True), 200
@@ -93,6 +92,12 @@ def deleteAssignment():
     if(request.method == 'POST'):
         
         try:
+            query = "Delete From StudentScores Where AssignmentId = {0}".format(int(AssignmentId))
+            cursor.execute(query)
+
+            query = "Delete From StudentAssignments Where AssignmentId = {0}".format(int(AssignmentId))
+            cursor.execute(query)
+
             query = "Delete From Assignments Where AssignmentId = {0}".format(int(AssignmentId))
             cursor.execute(query)
             return jsonify(True), 200
