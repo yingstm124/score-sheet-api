@@ -80,7 +80,7 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
 
   void _getStudentAssignment() async {
     final results = await StudentAssignmentApi.getStudentAssignment(
-        teachCourse.TeachCourseId);
+        assignment.AssignmentId);
     setState(() {
       _studentAssignments = results;
     });
@@ -115,7 +115,19 @@ class _StudentAssignmentPage extends State<StudentAssignmentPage> {
                                     title: Text(
                                         '${e.FirstName} ${e.LastName} ( Sec ${e
                                             .SecNo.toString()})'),
-                                    subtitle: Text(e.StudentId.toString()),
+                                    subtitle: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(e.StudentId.toString()),
+                                        Text((){
+                                          if(e.Score != null){
+                                            return '${e.Score}/${assignment.FullScore}';
+                                          }
+                                          return '0/${assignment.FullScore}';
+                                        }())
+                                      ],
+                                    ),
                                   )
                                 ],
                               ),

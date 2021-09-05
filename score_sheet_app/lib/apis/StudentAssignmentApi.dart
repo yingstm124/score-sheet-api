@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:score_sheet_app/helpers/BaseApi.dart';
+import 'package:score_sheet_app/models/SaveImage.dart';
 import 'package:score_sheet_app/models/StudentAssignment.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -11,8 +12,8 @@ class StudentAssignmentApi {
 
   static final String _baseUrl = BaseApi.getBaseAPI();
 
-  static Future<List<StudentAssignment>> getStudentAssignment(int _teachCourseId) async{
-    String url = _baseUrl + '/studentAssignments?teachCourseId=${_teachCourseId}';
+  static Future<List<StudentAssignment>> getStudentAssignment(int _assignmentId) async{
+    String url = _baseUrl + '/studentAssignments?AssignmentId=${_assignmentId}';
     EasyLoading.show(status: 'loading..');
 
     final res = await  http.get(Uri.parse(url));
@@ -29,8 +30,8 @@ class StudentAssignmentApi {
     }
   }
 
-  static Future<bool> saveImage(int _studentAssignmentId, File _image) async {
-    String url = _baseUrl + '/saveImage?studentAssignmentId=${_studentAssignmentId}';
+  static Future<bool> saveImage(int _teachStudentId, int _assignmentId ,File _image) async {
+    String url = _baseUrl + '/saveImage?TeachStudentId=${_teachStudentId}&AssignmentId=${_assignmentId}';
     final headers = { "Content-Type": "multipart/form-data" };
     EasyLoading.show(status: 'loading..');
     final request = await http.MultipartRequest(
@@ -52,8 +53,10 @@ class StudentAssignmentApi {
     else{
       EasyLoading.showError('Failed with Error');
       EasyLoading.dismiss();
+      throw Exception("Failed !");
       return false;
     }
-
   }
+
+
 }

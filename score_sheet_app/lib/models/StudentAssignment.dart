@@ -5,6 +5,7 @@ class StudentAssignment {
   final String FirstName;
   final String LastName;
   final String? Img;
+  final int? Score;
   final int SecNo;
 
   StudentAssignment({
@@ -14,6 +15,7 @@ class StudentAssignment {
     required this.FirstName,
     required this.LastName,
     this.Img,
+    this.Score,
     required this.SecNo
   });
 
@@ -25,6 +27,7 @@ class StudentAssignment {
         FirstName: json["FirstName"],
         LastName: json["LastName"],
         Img: json["Img"] ,
+        Score: json["Score"],
         SecNo: json["SecNo"]);
   }
 

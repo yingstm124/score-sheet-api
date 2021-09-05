@@ -3,12 +3,15 @@ import 'dart:io' as Io;
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:score_sheet_app/apis/PredictionApi.dart';
 import 'package:score_sheet_app/apis/StudentAssignmentApi.dart';
 import 'package:score_sheet_app/apis/PredictionApi.dart';
+import 'package:score_sheet_app/apis/StudentScoreApi.dart';
 import 'package:score_sheet_app/models/Assignment.dart';
 import 'package:score_sheet_app/models/PredictResult.dart';
+import 'package:score_sheet_app/models/SaveImage.dart';
 import 'package:score_sheet_app/models/TeachCourse.dart';
 
 
@@ -120,6 +123,7 @@ class _PreviewImage extends State<PreviewImage> {
       ),
       body: Center(
         child: _predictResult.StudentId != null ? SingleChildScrollView(
+          padding: EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -143,27 +147,49 @@ class _PreviewImage extends State<PreviewImage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      print('Cancel');
-                    },
-                    child: const Text('Cancel'),
+                  Expanded(
+                      flex: 1,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            print('Cancel');
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                      )
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      print('Save As');
+                  Expanded(
+                      flex: 1,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            print('Save As');
+                            // predictImage();
+                            if(_predictResult.TeachStudentId != null){
+                              final _image = Io.File(image!.path);
+                              final _saveImageSuccess = await StudentAssignmentApi.saveImage(_predictResult.TeachStudentId!, assignment.AssignmentId, _image);
+                              print('save image success');
+                              if(_saveImageSuccess){
+                                final _saveScoreSuccess = await StudentScoreApi.saveScore(
+                                    _predictResult.Scores,
+                                    _predictResult.StudentId.toString(),
+                                    assignment.AssignmentId,
+                                    teachCourse.TeachCourseId,
+                                    _predictResult.TeachStudentId!
+                                );
+                              }
+                              print('save score sucess !');
+                            }
+                            print('no save');
 
-                      predictImage();
-                      // final _saveImageSuccess = await StudentAssignmentApi.saveImage(2, _image);
-                      // if(_saveImageSuccess){
-                      //   print('save image success !!');
-                      //   await getStudentAssignment();
-                      //   Navigator.of(context).pop();
-                      // }
-                    },
-                    child: const Text('Save As'),
-                  ),
+                          },
+                          child: const Text('Save As'),
+                        ),
+                      )
+                  )
                 ],
               ),
             ],

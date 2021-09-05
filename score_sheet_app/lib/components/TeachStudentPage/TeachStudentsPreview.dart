@@ -68,14 +68,11 @@ class _TeachStudentsPreview extends State<TeachStudentsPreview>{
                   onPressed: () async {
                     print('import');
                     final _importSuccess = await TeachStudentApi.addTeachStudents(teachCourse.TeachCourseId, data);
-
                     if(_importSuccess){
                       print('success');
                       getTeachStudents();
                       Navigator.of(context).pop();
-
                     }
-
                   },
                   child: const Text('Import'),
                 ),
