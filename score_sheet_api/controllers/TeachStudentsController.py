@@ -80,6 +80,8 @@ def addTeachStudent():
                 if(res == None):
                     std["IsRegister"] = False
                     canInsert = False
+                    return Handle_error(err, 500)  
+                    
                 else:
                     std["IsRegister"] = True
                     
