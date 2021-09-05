@@ -43,7 +43,10 @@ class _PreviewImage extends State<PreviewImage> {
   TeachCourse teachCourse;
   XFile? image ;
 
-  var _predictResult = new PredictResult(StudentId: 0, Scores: [], Message: "");
+  PredictResult _predictResult = new PredictResult(StudentId: 0, Scores: [], Message: "");
+
+  final _studentIdController = TextEditingController();
+  final _scoreController = TextEditingController();
 
   _PreviewImage({
     required this.getStudentAssignment,
@@ -62,6 +65,20 @@ class _PreviewImage extends State<PreviewImage> {
         });
   }
 
+  void setStudentId(int studentId) async {
+    setState(() {
+      print(studentId);
+      _predictResult.StudentId = studentId;
+    });
+  }
+
+  void setScores(int score, int index) async {
+    setState(() {
+      print('${index.toString()} : ${score.toString()}');
+      _predictResult.Scores[index] = score;
+    });
+  }
+
   @override
   void initState() {
     // predict from image
@@ -70,11 +87,25 @@ class _PreviewImage extends State<PreviewImage> {
 
   Widget getScoreWidget(List<dynamic> scores){
     List<Widget> list = [];
-    int i = 1;
-    scores.forEach((element) {
-      list.add(new Text('Score ${i} : ${element.toString()}'));
-      i++;
-    });
+    for(var i=0; i < scores.length; i++){
+      list.add(
+          new TextFormField(
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText:  "Score ${i+1} : ${scores[i].toString()}"),
+            validator: (value){
+              if(value == null || value.isEmpty){
+                return 'Please enter assignment name';
+              }
+              return null;
+            },
+            onChanged: (String value) async {
+              if(value != null){
+                print(i);
+                setScores(int.parse(value),i);
+              }
+            },
+          ));
+    }
     return new Column(
       children: list,
     );
@@ -87,63 +118,65 @@ class _PreviewImage extends State<PreviewImage> {
         title: Text(image!.name.toString()),
       ),
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Text('${_predictResult.Message}'),
-                    Text('${assignment.AssignmentName}'),
-                    Text('${teachCourse.CourseName} (${teachCourse.CourseId})'),
-                    Text('Semester ${teachCourse.Term}/${teachCourse.Year}')
-                  ],
-                )
-              ],
-            ),
-            Image.file(File(image!.path)),
-            Row(
-              children: <Widget>[
-                Column(
-                  children: <Widget>[
-                    Text('Student Id : ${_predictResult.StudentId.toString()}'),
-                    getScoreWidget(_predictResult.Scores)
-                  ],
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    print('Cancel');
-                  },
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    print('Submit');
-                    predictImage();
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text('${_predictResult.Message}'),
+                      Text('${assignment.AssignmentName}'),
+                      Text('${teachCourse.CourseName} (${teachCourse.CourseId})'),
+                      Text('Semester ${teachCourse.Term}/${teachCourse.Year}')
+                    ],
+                  )
+                ],
+              ),
+              Image.file(File(image!.path)),
+              TextField(
+                controller: _studentIdController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText:  "Student Id : ${_predictResult.StudentId.toString()}"),
+                onChanged: (String value) async {
+                  if(value != null){
+                    setStudentId(int.parse(value));
+                  }
+                },
+              ),
+              getScoreWidget(_predictResult.Scores),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      print('Cancel');
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      print('Submit');
+                      predictImage();
 
-                    // final _saveImageSuccess = await StudentAssignmentApi.saveImage(2, _image);
-                    // if(_saveImageSuccess){
-                    //   print('save image success !!');
-                    //   await getStudentAssignment();
-                    //   Navigator.of(context).pop();
-                    // }
-                  },
-                  child: const Text('Submit'),
-                ),
-              ],
-            ),
-          ],
-        ),
-
+                      // final _saveImageSuccess = await StudentAssignmentApi.saveImage(2, _image);
+                      // if(_saveImageSuccess){
+                      //   print('save image success !!');
+                      //   await getStudentAssignment();
+                      //   Navigator.of(context).pop();
+                      // }
+                    },
+                    child: const Text('Submit'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        )
       ),
 
     );
