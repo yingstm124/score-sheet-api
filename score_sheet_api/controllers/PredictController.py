@@ -49,7 +49,8 @@ def predict():
                 datas = Processing.Sheets(image, binary_image).processing()
                 result_studentId = datas["StudentId"]
                 result_scores = datas['Scores']
-                
+                os.remove(pathImage+"/static/predicts/{0}".format(filename))
+
                 # check Student ID
                 query = "select S.StudentId from students S inner join teachStudents TS on TS.StudentId = S.StudentId Where S.StudentId = {0} And TS.TeachCourseId = {1}".format(result_studentId,teachCourse_id)
                 cursor.execute(query)
