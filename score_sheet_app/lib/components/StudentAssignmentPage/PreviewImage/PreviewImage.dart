@@ -43,7 +43,7 @@ class _PreviewImage extends State<PreviewImage> {
   TeachCourse teachCourse;
   XFile? image ;
 
-  PredictResult _predictResult = new PredictResult(StudentId: 0, Scores: [], Message: "");
+  PredictResult _predictResult = new PredictResult(StudentId: null, Scores: [], Message: "");
 
   _PreviewImage({
     required this.getStudentAssignment,
@@ -64,7 +64,6 @@ class _PreviewImage extends State<PreviewImage> {
 
   void setStudentId(int studentId) async {
     setState(() {
-      print(studentId);
       _predictResult.StudentId = studentId;
     });
   }
@@ -82,7 +81,19 @@ class _PreviewImage extends State<PreviewImage> {
     predictImage();
   }
 
-  Widget getScoreWidget(List<dynamic> scores){
+  Widget TextFormFieldStudentIdWidget(int studentId){
+    return new TextFormField(
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(labelText:  "Student Id : ${studentId.toString()}"),
+      initialValue: "${_predictResult.StudentId.toString()}",
+      onChanged: (String value) async {
+        print(value);
+        setStudentId(int.parse(value));
+      },
+    );
+  }
+
+  Widget TextFormFieldScoreWidget(List<dynamic> scores){
     List<Widget> list = [];
     for(var i=0; i < scores.length; i++){
       list.add(
@@ -91,6 +102,7 @@ class _PreviewImage extends State<PreviewImage> {
             decoration: InputDecoration(labelText:  "Score ${i+1} : ${scores[i].toString()}"),
             initialValue: "${_predictResult.Scores[i].toString()}",
             onChanged: (String value) async {
+              print(value);
               setScores(int.parse(value),i);
             },
           ));
@@ -107,7 +119,7 @@ class _PreviewImage extends State<PreviewImage> {
         title: Text(image!.name.toString()),
       ),
       body: Center(
-        child: SingleChildScrollView(
+        child: _predictResult.StudentId != null ? SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -126,17 +138,8 @@ class _PreviewImage extends State<PreviewImage> {
                 ],
               ),
               Image.file(File(image!.path)),
-              TextFormField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText:  "Student Id : ${_predictResult.StudentId.toString()}"),
-                initialValue: "${_predictResult.StudentId.toString()}",
-                onChanged: (String value) async {
-                  if(value != null){
-                    setStudentId(int.parse(value));
-                  }
-                },
-              ),
-              getScoreWidget(_predictResult.Scores),
+              TextFormFieldStudentIdWidget(_predictResult.StudentId!),
+              TextFormFieldScoreWidget(_predictResult.Scores),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
@@ -151,7 +154,7 @@ class _PreviewImage extends State<PreviewImage> {
                     onPressed: () async {
                       print('Save As');
 
-                      // predictImage();
+                      predictImage();
                       // final _saveImageSuccess = await StudentAssignmentApi.saveImage(2, _image);
                       // if(_saveImageSuccess){
                       //   print('save image success !!');
@@ -165,6 +168,8 @@ class _PreviewImage extends State<PreviewImage> {
               ),
             ],
           ),
+        ) : Center(
+          child: Text('loading ....'),
         )
       ),
 
