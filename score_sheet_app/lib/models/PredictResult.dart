@@ -1,6 +1,6 @@
 class PredictResult {
-  final int StudentId;
-  final List<dynamic> Scores;
+  int StudentId;
+  List<dynamic> Scores;
   final String Message;
 
   PredictResult({
