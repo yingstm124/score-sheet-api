@@ -15,19 +15,23 @@ def getTeachStudents():
     teach_course_id = request.args.get('teachCourseId') 
     if(request.method == 'GET'):
         try: 
-            query = "SELECT TS.TeachStudentId, S.StudentId, S.FirstName, S.LastName, S.NickName, TS.SecNo From TeachStudents TS INNER JOIN Students S ON TS.StudentId = S.StudentId WHERE TS.TeachCourseId = {0}".format(teach_course_id)
+            query = '''SELECT TS.TeachStudentId, S.StudentId, S.FirstName, S.LastName, S.NickName, TS.SecNo 
+                    From TeachStudents TS 
+                    INNER JOIN Students S ON TS.StudentId = S.StudentId 
+                    WHERE TS.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
             res = cursor.fetchall()
             
             if(res == None):
                 print("No Content")
                 return ('',204)
-            
         
         except pymysql.Error as err:
             print(err)
             return Handle_error(err, 500)
-    
+
+    response = jsonify(res)
+            
     return jsonify(res), 200
 
 
@@ -38,7 +42,9 @@ def getCountTeachStudents():
     if(request.method == 'GET'):
         
         try: 
-            query = "Select COUNT(ts.TeachStudentId) AS Count FROM TeachCourses tc INNER JOIN TeachStudents ts ON tc.TeachCourseId = ts.TeachCourseId WHERE tc.TeachCourseId = {0}".format(teach_course_id)
+            query = '''Select COUNT(ts.TeachStudentId) AS Count FROM TeachCourses tc 
+                    INNER JOIN TeachStudents ts ON tc.TeachCourseId = ts.TeachCourseId 
+                    WHERE tc.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
             res = cursor.fetchone()
             
@@ -60,60 +66,83 @@ def addTeachStudent():
     
     teach_course_id = request.args.get('teachCourseId') 
     if(request.method == 'POST'):
+        '''
+            => input body 
+            {
+                "StudentId": int
+                "SecNo": int
+            }
+            => output body
+            [
+                {
+                    "StudentId": int
+                    "IsRegister": boolean
+                    "SecNo":int
+                }
+            ]
+        '''
         students = request.json
-        print(type(students))
+        
         
         try:
-            # find student in student system
-            canInsert = True
+            insert_students = []
             for std in students:
                 print(type(std))
                 
                 if(not isinstance(std,dict)):
                     std = json.loads(std)
-                
-                print(std["StudentId"])
-                query_find = "SELECT StudentId FROM Students WHERE StudentId = {0}".format(int(std["StudentId"]))
+
+                std_obj = {
+                    "StudentId": std["StudentId"],
+                    "IsRegister": False,
+                    "SecNo": int(std["SecNo"])
+                }
+
+                # check student in system ?
+                query_find = '''
+                    SELECT StudentId 
+                    FROM Students 
+                    WHERE StudentId = {0}'''.format(int(std["StudentId"]))
                 cursor.execute(query_find)
                 res = cursor.fetchone()
+                    
+                if(res != None):
+                    # check student duplicate on teach student ?
+                    query_find = ''' 
+                        SELECT T.TeachStudentId
+                        FROM TeachStudents T
+                        WHERE T.StudentId = {0} AND T.TeachCourseId = {1}
+                    '''.format(std["StudentId"], teach_course_id)
+                    cursor.execute(query_find)
+                    teachStudent = cursor.fetchone()
+
+                    if(teachStudent == None): 
+                        std_obj["IsRegister"] = True
                 
-                if(res == None):
-                    std["IsRegister"] = False
-                    canInsert = False
-                    return Handle_error(err, 500)  
-                    
-                else:
-                    std["IsRegister"] = True
-                    
-            #res = students
+                insert_students.append(std_obj)
                 
             # loop for insert
-            if(canInsert == True):
-                for std in students:
-                    
-                    if(not isinstance(std,dict)):
-                        std = json.loads(std)
+            for insert_student in insert_students:
 
-                    query = "INSERT INTO TeachStudents(StudentId, TeachCourseId, SecNo) VALUES(%s,%s,%s)"
-                    res = cursor.execute(query,(int(std["StudentId"]), int(teach_course_id), int(std["SecNo"])))
-                    std["TeachStudentId"] = cursor.lastrowid
+                if(insert_student["IsRegister"]):
+                    query = '''INSERT INTO TeachStudents(StudentId, TeachCourseId, SecNo) 
+                                VALUES(%s,%s,%s)'''
+                    cursor.execute(query,(int(insert_student["StudentId"]), int(teach_course_id), int(insert_student["SecNo"])))
+                    teachStudentId = cursor.lastrowid
                     getDb().commit()
-                    
-                    query = "INSERT INTO StudentAssignments (TeachStudentId) VALUES(%s)"
-                    cursor.execute(query, int(std["TeachStudentId"]))
+                        
+                    query = '''INSERT INTO StudentAssignments (TeachStudentId) 
+                                VALUES(%s)'''
+
+                    cursor.execute(query, int(teachStudentId))
                     getDb().commit()
-                
-                getDb().close()
-                res = students
-            else:
-                res = students
-                return jsonify(res), 200
+
+            response = jsonify(insert_students)
+            return jsonify(insert_students), 200
 
         except pymysql.Error as err:
             print(err)
             return Handle_error(err, 500)  
-    
-    return jsonify(res), 200
 
 
 @app.route('/deleteTeachStudent', methods=['POST'])
@@ -124,11 +153,13 @@ def deleteTeachStudent():
         
         try:
             
-            query = "Delete From StudentAssignments Where TeachStudentId = {0}".format(int(teachStudentId))
+            query = '''Delete From StudentAssignments 
+                    Where TeachStudentId = {0}'''.format(int(teachStudentId))
             cursor.execute(query)
             getDb().commit()
             
-            query = "Delete From TeachStudents Where TeachStudentId = {0}".format(int(teachStudentId))
+            query = '''Delete From TeachStudents 
+                    Where TeachStudentId = {0}'''.format(int(teachStudentId))
             cursor.execute(query)
             getDb().commit()
             

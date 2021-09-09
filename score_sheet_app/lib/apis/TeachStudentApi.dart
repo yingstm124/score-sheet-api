@@ -1,5 +1,6 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:score_sheet_app/helpers/BaseApi.dart';
+import 'package:score_sheet_app/models/AddStudent.dart';
 import 'package:score_sheet_app/models/Counter.dart';
 import 'package:score_sheet_app/models/TeachStudent.dart';
 import 'package:http/http.dart' as http;
@@ -40,7 +41,7 @@ class TeachStudentApi {
     }
   }
 
-  static Future<bool> addTeachStudents(int _teachCourseId, List<TeachStudent> _data) async {
+  static Future<List<AddStudent>> addTeachStudents(int _teachCourseId, List<TeachStudent> _data) async {
     String url = _baseUrl + '/addTeachStudents?teachCourseId=${_teachCourseId.toString()}';
     final jsonData = _data.map((e) => jsonEncode(<String,String>{
       "StudentId": e.StudentId.toString(),
@@ -59,15 +60,18 @@ class TeachStudentApi {
         body: jsonEncode(jsonData)
     );
 
-    if(res.statusCode == 200){
+    if (res.statusCode == 200) {
+      final List<dynamic> result = jsonDecode(res.body);
+      List<AddStudent> lists = result.map((e) => AddStudent.fromJson(e)).toList();
       EasyLoading.dismiss();
-      return true;
-    }
-    else{
+      return lists;
+    } else {
       EasyLoading.showError('Failed with Error');
-      EasyLoading.dismiss();
       throw Exception("Failed !");
     }
+
+    EasyLoading.dismiss();
+    throw Exception("Failed !");
   }
 
   static Future<bool> deleteTeachStudents(int _teachStudentId) async{

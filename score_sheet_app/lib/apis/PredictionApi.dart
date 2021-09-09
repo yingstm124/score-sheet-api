@@ -12,7 +12,7 @@ class PredictApi {
   static Future<PredictResult> predict(int _assignmentId, int _teachCouseId, File _image) async {
     String url = _baseUrl + '/predict?assignmentId=${_assignmentId}&teachCourseId=${_teachCouseId}';
     final headers = { "Content-Type": "multipart/form-data" };
-    EasyLoading.show(status: 'loading..');
+    EasyLoading.show(status: 'predict loading..');
     final request = http.MultipartRequest(
         "POST", Uri.parse(url)
     );
@@ -30,7 +30,6 @@ class PredictApi {
       final body = await res.stream.bytesToString();
       final dynamic result = jsonDecode(body);
       PredictResult answer = PredictResult.fromJson(result);
-      print("Teach Student Id : ${answer.TeachStudentId}");
       return answer;
     }
     else {

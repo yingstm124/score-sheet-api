@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:score_sheet_app/helpers/BaseApi.dart';
-import 'package:score_sheet_app/models/SaveImage.dart';
 import 'package:score_sheet_app/models/StudentAssignment.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

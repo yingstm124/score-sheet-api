@@ -10,24 +10,6 @@ import werkzeug
 # initial database
 cursor = getDb().cursor()
 
-
-# @app.route('/saveImage', methods=['POST'])
-# def uploadImage():
-#     if request.method == "POST":
-        
-#         student_assignment_id = request.args.get('studentAssignmentId') 
-#         img = request.json['image']
-        
-#         try:
-#             query = "UPDATE studentassignments SET img=%s WHERE StudentAssignmentId=%s"
-#             cursor.execute(query,(img, int(student_assignment_id)))
-#             return jsonify(True), 200
-        
-#         except pymysql.Error as err:
-#             print(err)
-#             return Handle_error(False, 500)  
-
-
 @app.route('/saveImage', methods=['POST'])
 def uploadImage():
     if(request.method == "POST"):

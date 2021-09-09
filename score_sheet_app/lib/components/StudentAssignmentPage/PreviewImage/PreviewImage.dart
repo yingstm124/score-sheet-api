@@ -9,9 +9,9 @@ import 'package:score_sheet_app/apis/PredictionApi.dart';
 import 'package:score_sheet_app/apis/StudentAssignmentApi.dart';
 import 'package:score_sheet_app/apis/PredictionApi.dart';
 import 'package:score_sheet_app/apis/StudentScoreApi.dart';
+import 'package:score_sheet_app/helpers/ConvertType.dart';
 import 'package:score_sheet_app/models/Assignment.dart';
 import 'package:score_sheet_app/models/PredictResult.dart';
-import 'package:score_sheet_app/models/SaveImage.dart';
 import 'package:score_sheet_app/models/TeachCourse.dart';
 
 
@@ -114,6 +114,30 @@ class _PreviewImage extends State<PreviewImage> {
       children: list,
     );
   }
+  
+  Widget TotalScoreWidget(List<int> scores){
+    return Container(
+      padding: EdgeInsets.all(20),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            'Total Score',
+            style: TextStyle(
+              fontSize: 20
+            ),
+          ),
+          Text(
+              '${scores.reduce((value, element) => value + element)}',
+              style: TextStyle(
+              fontSize: 20
+            ),
+          )
+        ],
+      )
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +168,7 @@ class _PreviewImage extends State<PreviewImage> {
               Image.file(File(image!.path)),
               TextFormFieldStudentIdWidget(_predictResult.StudentId!),
               TextFormFieldScoreWidget(_predictResult.Scores),
+              TotalScoreWidget(_predictResult.Scores.map((e) => ConvertType.intOrStringValue(e)).toList()),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
@@ -180,6 +205,20 @@ class _PreviewImage extends State<PreviewImage> {
                                     teachCourse.TeachCourseId,
                                     _predictResult.TeachStudentId!
                                 );
+                                await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) => AlertDialog(
+                                      title: Text('Save Score Success'),
+                                      content: Text('${_saveScoreSuccess.Message}'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                            onPressed: () => Navigator.pop(context, 'Ok'),
+                                            child: Text("OK")
+                                        ),
+                                      ],
+                                    ));
+                                Navigator.of(context).pop();
+                                await getStudentAssignment();
                               }
                               print('save score sucess !');
                             }

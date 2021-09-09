@@ -34,7 +34,7 @@ class StudentScoreApi {
       "StudentId": _studentId.toString(),
       "AssignmentId": _assignmentId.toString(),
       "TeachCourseId": _teachCourseId.toString(),
-      "TeachStudentId": _teachStudentId.toString()
+        "TeachStudentId": _teachStudentId.toString()
     });
     EasyLoading.show(status: 'loading..');
     final res = await http.post(Uri.parse(url),

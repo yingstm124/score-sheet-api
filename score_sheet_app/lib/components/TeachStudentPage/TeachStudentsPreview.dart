@@ -68,11 +68,31 @@ class _TeachStudentsPreview extends State<TeachStudentsPreview>{
                   onPressed: () async {
                     print('import');
                     final _importSuccess = await TeachStudentApi.addTeachStudents(teachCourse.TeachCourseId, data);
-                    if(_importSuccess){
-                      print('success');
-                      getTeachStudents();
-                      Navigator.of(context).pop();
-                    }
+                    await showDialog(
+                        context: context,
+                        builder: (BuildContext context) => AlertDialog(
+                          title: const Text("import Success!"),
+                          content: ListView.builder(
+                              itemCount: _importSuccess.length,
+                              itemBuilder: (BuildContext context, int index){
+                                return ListTile(
+                                  title: Text(_importSuccess[index].StudentId),
+                                  subtitle: Text(
+                                      _importSuccess[index].IsRegister
+                                          ? 'already inserted'
+                                          : 'can not insert'
+                                  )
+                                );
+                              }),
+                          actions: <Widget>[
+                            TextButton(
+                                onPressed: () => Navigator.pop(context, 'Ok'),
+                                child: Text("OK")
+                            ),
+                          ],
+                        ));
+                    Navigator.of(context).pop();
+                    await getTeachStudents();
                   },
                   child: const Text('Import'),
                 ),

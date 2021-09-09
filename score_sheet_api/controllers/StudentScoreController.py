@@ -48,7 +48,10 @@ def saveScore():
     if(request.method == "POST"):
         try:
             # check Student ID
-            query = "select S.StudentId from students S inner join teachStudents TS on TS.StudentId = S.StudentId Where S.StudentId = {0} And TS.TeachCourseId = {1} ".format(student_id,teachcourse_id)
+            query = '''select S.StudentId 
+                        from students S 
+                        inner join teachStudents TS on TS.StudentId = S.StudentId 
+                        Where S.StudentId = {0} And TS.TeachCourseId = {1} '''.format(student_id,teachcourse_id)
             cursor.execute(query)
             res = cursor.fetchone()
 
@@ -59,46 +62,57 @@ def saveScore():
             
             # Case 1 : Found Student
             else:
-                query = "select SS.Score from studentscores SS inner join scores S on SS.ScoreId = S.ScoreId inner join assignments A on S.AssignmentId = A.AssignmentId Where S.AssignmentId = {0} And  A.AssignmentId = {1}".format(student_id,assignment_id)
+                query = '''select SS.StudentScoreId, SS.StudentId, S.ScoreId
+                            from studentscores SS
+                            inner join scores S on S.ScoreId = SS.ScoreId 
+                            Where SS.StudentId = {0} And  SS.AssignmentId = {1}'''.format(student_id,assignment_id)
+
                 cursor.execute(query)
                 res = cursor.fetchall()
 
                 # Case 1.1 : never detect, insert Score Records
                 if(len(res) == 0):
                     for index, score in enumerate(scores):
-                        query_insert_score = "INSERT INTO Scores(AssignmentId) VALUES(%s)"
-                        cursor.execute(query_insert_score,(assignment_id))
+                        query_insert_score = '''INSERT INTO Scores(AssignmentId,score, pageNo) 
+                                                VALUES(%s,%s,%s)'''
+                        cursor.execute(query_insert_score,(assignment_id, score, index+1))
                         score_id = cursor.lastrowid
                         getDb().commit()
 
-                        query_insert_student_score = "INSERT INTO StudentScores(StudentId,ScoreId,Score,AssignmentId) VALUES(%s,%s,%s,%s)"
+                        query_insert_student_score = '''INSERT INTO StudentScores(StudentId,ScoreId,Score,AssignmentId) 
+                                                        VALUES(%s,%s,%s,%s)'''
                         res = cursor.execute(query_insert_student_score,(int(student_id),int(score_id),int(score),int(assignment_id)))
                         getDb().commit()
-                        
-                        if (index == len(scores) - 1):
-                            # Find Student Assignment Id
-                            query_select_id = "select SA.StudentAssignmentId from studentassignments SA Where TeachStudentId = {0} AND AssignmentId = {1}".format(teach_student_id,assignment_id)
-                            cursor.execute(query_select_id)
-                            res = cursor.fetchone()
-                            student_assign_id = res["StudentAssignmentId"]
-
-                            query_update = "UPDATE StudentAssignments SET Score=%s Where StudentAssignmentId=%s"
-                            cursor.execute(query_update,(int(score),int(student_assign_id)))
-                            getDb().commit()
-
-                    # if(request.files['image']):
-                    #     image = request.files['image']
-                    #     filename = werkzeug.utils.secure_filename(image.filename)
-                    #     pathImage = os.path.join(app.root_path,'./static',filename)
-                    #     image.save(pathImage)
 
                     return jsonify(response), 200
 
                 # Case 1.2 : already detect, update Score Records
                 else:
-                    # Not yet !!
-                    response["Message"] = "Already Detect"
-                    return jsonify(response), 200
+                    # update student score by student score Id
+                    for index, score in enumerate(scores):
+                        if(index < len(scores)):
+                            query = ''' update Scores 
+                                    SET Score=%s,PageNo=%s
+                                    WHERE ScoreId = {0} '''.format(int(res[index]["ScoreId"]))
+                            cursor.execute(query, (int(score),int(index+1)))
+                            getDb().commit()
+
+                # Find Student Assignment Id
+                query_select_id = '''select SA.StudentAssignmentId 
+                                    from studentassignments SA 
+                                    Where TeachStudentId = {0} AND AssignmentId = {1}'''.format(teach_student_id,assignment_id)
+                cursor.execute(query_select_id)
+                res = cursor.fetchone()
+                student_assign_id = res["StudentAssignmentId"]
+
+                query_update = '''UPDATE StudentAssignments 
+                                SET Score=%s 
+                                Where StudentAssignmentId=%s'''
+                cursor.execute(query_update,(sum(scores),int(student_assign_id)))
+                getDb().commit()
+
+                response["Message"] = "Already Detect"
+                return jsonify(response), 200
 
         except pymysql.Error as err:
             return Handle_error(err,500)
