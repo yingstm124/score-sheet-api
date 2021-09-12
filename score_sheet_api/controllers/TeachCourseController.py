@@ -21,7 +21,10 @@ def getTeachCourses():
     if request.method == 'GET':
         
         try:
-            query = "SELECT TC.TeachCourseId, C.CourseId , C.CourseName, TC.Term, TC.Year FROM TeachCourses TC INNER JOIN Courses C on C.CourseId = TC.CourseId"
+            query = '''
+                SELECT TC.TeachCourseId, C.CourseId , C.CourseName, TC.Term, TC.Year 
+                FROM TeachCourses TC 
+                INNER JOIN Courses C on C.CourseId = TC.CourseId'''
             cursor.execute(query)
             res = cursor.fetchall()
             
@@ -43,7 +46,11 @@ def getTeachCourse():
     if request.method == 'GET':
         
         try: 
-            query = "SELECT TC.TeachCourseId, C.CourseId , C.CourseName, TC.Term, TC.Year FROM TeachCourses TC INNER JOIN Courses C on C.CourseId = TC.CourseId WHERE TC.TeachCourseId = {0}".format(teach_course_id)
+            query = '''
+                SELECT TC.TeachCourseId, C.CourseId , C.CourseName, TC.Term, TC.Year 
+                FROM TeachCourses TC 
+                INNER JOIN Courses C on C.CourseId = TC.CourseId 
+                WHERE TC.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
             row_headers=[x[0].lower() for x in cursor.description]
             res = cursor.fetchall()

@@ -22,26 +22,32 @@ def uploadImage():
                 filename = werkzeug.utils.secure_filename(image.filename)
 
                 # Find Student Assignment Id
-                query_select_id = "select SA.StudentAssignmentId from studentassignments SA Where TeachStudentId = {0} AND AssignmentId = {1}".format(teach_std_id,assignment_id)
+                query_select_id = '''
+                    select SA.StudentAssignmentId 
+                    from studentassignments SA 
+                    Where TeachStudentId = {0} AND AssignmentId = {1}'''.format(teach_std_id,assignment_id)
                 cursor.execute(query_select_id)
                 res = cursor.fetchone()
                 student_assign_id = res["StudentAssignmentId"]
 
                 # Check duplicate image
-                query_select = "SELECT S.img FROM studentassignments S  WHERE StudentAssignmentId={0}".format(student_assign_id)
+                query_select = '''
+                    SELECT S.img 
+                    FROM studentassignments S  
+                    WHERE StudentAssignmentId={0}'''.format(student_assign_id)
                 cursor.execute(query_select)
                 res = cursor.fetchone()
 
                 if(res['img'] != None):
                     os.remove(app.root_path+res['img'])
 
-                query = "UPDATE studentassignments SET img=%s WHERE StudentAssignmentId=%s"
+                query = '''
+                    UPDATE studentassignments 
+                    SET img=%s 
+                    WHERE StudentAssignmentId=%s'''
                 cursor.execute(query,('/static/'+filename, int(student_assign_id)))
-                
 
-                print(app.root_path)
                 pathImage = os.path.join(app.root_path,'./static/',filename)
-                print(pathImage)
                 image.save(pathImage)
             
                 return jsonify(student_assign_id), 200

@@ -125,17 +125,29 @@ def addTeachStudent():
             for insert_student in insert_students:
 
                 if(insert_student["IsRegister"]):
-                    query = '''INSERT INTO TeachStudents(StudentId, TeachCourseId, SecNo) 
+                    query = '''
+                                INSERT INTO TeachStudents(StudentId, TeachCourseId, SecNo) 
                                 VALUES(%s,%s,%s)'''
                     cursor.execute(query,(int(insert_student["StudentId"]), int(teach_course_id), int(insert_student["SecNo"])))
                     teachStudentId = cursor.lastrowid
                     getDb().commit()
-                        
-                    query = '''INSERT INTO StudentAssignments (TeachStudentId) 
-                                VALUES(%s)'''
 
-                    cursor.execute(query, int(teachStudentId))
-                    getDb().commit()
+                    # check assignment from teach course id
+                    query = ''' 
+                                SELECT AssignmentId 
+                                FROM Assignments
+                                WHERE TeachCourseId = {0}'''.format(teach_course_id)
+                    cursor.execute(query)
+                    assignmentIds = cursor.fetchall()
+
+                    if(assignmentIds != None):
+                        for assignmentId in assignmentIds:
+                            q = '''
+                                    INSERT INTO StudentAssignments (TeachStudentId,AssignmentId) 
+                                    VALUES(%s,%s)'''
+                            cursor.execute(q, (int(teachStudentId),int(assignmentId["AssignmentId"])))
+                            getDb().commit()
+
 
             response = jsonify(insert_students)
             return jsonify(insert_students), 200

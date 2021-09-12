@@ -16,7 +16,12 @@ def getStudentAssignments():
     assignment_id = request.args.get('AssignmentId')
     if(request.method == 'GET'):
         try: 
-            query = "SELECT SA.StudentAssignmentId, SA.TeachStudentId, SA.Img, TS.StudentId, TS.SecNo,S.FirstName, S.LastName, SA.Score FROM StudentAssignments SA INNER JOIN TeachStudents TS ON SA.TeachStudentId = TS.TeachStudentId INNER JOIN Students S ON S.StudentId = TS.StudentId Where SA.AssignmentId = {0} group by TS.StudentId;".format(int(assignment_id))
+            query = '''
+                SELECT SA.StudentAssignmentId, SA.TeachStudentId, SA.Img, TS.StudentId, TS.SecNo,S.FirstName, S.LastName, SA.Score 
+                FROM StudentAssignments SA 
+                INNER JOIN TeachStudents TS ON SA.TeachStudentId = TS.TeachStudentId 
+                INNER JOIN Students S ON S.StudentId = TS.StudentId 
+                Where SA.AssignmentId = {0} '''.format(int(assignment_id))
             cursor.execute(query)
             res = cursor.fetchall()
             for r in res:

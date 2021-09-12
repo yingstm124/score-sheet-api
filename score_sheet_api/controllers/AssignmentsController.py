@@ -15,7 +15,10 @@ def getAssignments():
     if (request.method == 'GET'):
         
         try: 
-            query = "SELECT * From Assignments A WHERE A.TeachCourseId = {0}".format(teach_course_id)
+            query = '''
+                        SELECT * 
+                        From Assignments A 
+                        WHERE A.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
             res = cursor.fetchall()
             
@@ -38,7 +41,10 @@ def getCountAssignments():
     if(request.method == 'GET'):
         
         try:
-            query = "SELECT COUNT(A.AssignmentId) as Count From Assignments A WHERE A.TeachCourseId = {0}".format(teach_course_id)
+            query = '''
+                SELECT COUNT(A.AssignmentId) as Count 
+                From Assignments A 
+                WHERE A.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
             res = cursor.fetchone()
             
@@ -61,22 +67,29 @@ def addAssignment():
         fullScore = request.json['FullScore']
         
         try:
-            
-            query_select_teachstd = "SELECT TeachStudentId FROM TeachStudents WHERE TeachCourseId = {0}".format(teach_course_id)
+            # check teach students
+            query_select_teachstd = '''
+                                        SELECT TeachStudentId 
+                                        FROM TeachStudents 
+                                        WHERE TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query_select_teachstd)
             teach_stds = cursor.fetchall()
 
-            if(teach_stds == None):
-                return Handle_error(err, 500)  
-
-            query = "INSERT INTO Assignments (TeachCourseId, FullScore, AssignmentName) VALUES (%s,%s,%s)"
-            cursor.execute(query, (int(teach_course_id), int(fullScore), assignmentName))  
+            #insert assignment
+            query_insert = ''' 
+                            INSERT INTO Assignments (TeachCourseId,FullScore,AssignmentName)
+                            VALUES(%s,%s,%s)'''
+            cursor.execute(query_insert,(teach_course_id, fullScore, assignmentName))
             assignment_id = cursor.lastrowid
+            getDb().commit()      
 
-            for teach_std in teach_stds:
-                query_add = "INSERT INTO StudentAssignments (TeachStudentId, AssignmentId) VALUES (%s,%s)"
-                cursor.execute(query_add,(int(teach_std['TeachStudentId']),int(assignment_id)))
-                getDb().commit()
+            if(teach_stds != None):
+                for teach_std in teach_stds:
+                    query_add = '''
+                            INSERT INTO StudentAssignments (TeachStudentId, AssignmentId) 
+                            VALUES (%s,%s)'''
+                    cursor.execute(query_add,(int(teach_std['TeachStudentId']),int(assignment_id)))
+                    getDb().commit()
             
             return jsonify(True), 200
         
