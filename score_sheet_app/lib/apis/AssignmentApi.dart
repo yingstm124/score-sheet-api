@@ -83,4 +83,27 @@ class AssignmentApi {
     }
   }
 
+  static Future<bool> editAssignment(int _assignmentId, String _assignmentName) async {
+    String url = _baseUrl + '/editAssignment?AssignmentId=${_assignmentId}';
+    final jsonData = jsonEncode(<String,String>{
+      "AssignmentName": _assignmentName,
+    });
+    EasyLoading.show(status: 'loading..');
+    final res = await http.post(Uri.parse(url),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: jsonData
+    );
+
+    if (res.statusCode == 200) {
+      EasyLoading.dismiss();
+      return true;
+    } else {
+      EasyLoading.showError('Failed with Error');
+      EasyLoading.dismiss();
+      throw Exception("Failed !");
+    }
+  }
+
 }

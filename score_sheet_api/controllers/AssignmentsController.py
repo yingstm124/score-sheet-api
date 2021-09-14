@@ -120,3 +120,21 @@ def deleteAssignment():
             return Handle_error(err, 500)  
         
     return jsonify(False), 200
+
+@app.route('/editAssignment', methods=['POST'])
+def editAssignment():
+
+    AssignmentId = request.args.get('AssignmentId')
+    AssignmentName = request.json['AssignmentName']
+    if(request.method == 'POST'):
+        try:
+            query = '''
+                    UPDATE Assignments
+                    SET AssignmentName=%s 
+                    WHERE AssignmentId=%s
+            '''
+            cursor.execute(query,(AssignmentName, AssignmentId))
+            return jsonify(True), 200
+
+        except pymysql.Error as err:
+            return Handle_error(err, 500)

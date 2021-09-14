@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:score_sheet_app/apis/AssignmentApi.dart';
+import 'package:score_sheet_app/components/AssignmentPage/AssignmentEditForm.dart';
 import 'package:score_sheet_app/components/CourseHeader/CourseHeader.dart';
 import 'package:score_sheet_app/components/StudentAssignmentPage/StudentAssignmentPage.dart';
 import 'package:score_sheet_app/models/Assignment.dart';
@@ -94,17 +95,52 @@ class _AssignmentPage extends State<AssignmentPage>{
                       title: Text(
                           '${e.AssignmentName}'),
                       subtitle: Text('FullScore ${e.FullScore.toString()}'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async{
-                          print('Delete Assignment');
-                          final _delAssignmentSuccess = await AssignmentApi.deleteAssignment(e.AssignmentId);
-                          if(_delAssignmentSuccess){
-                            print('del assignment success !');
-                            getAssignments();
-                            getTotalAssignment();
-                          }
-                        },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () async{
+                              print('Edit Assignment');
+                              return showDialog<void>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                        title: const Text('Edit'),
+                                        content: AssignmentEditForm(assignment: e, getAssignments: getAssignments,)
+                                    );
+                                  }
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () async{
+                              print('Delete Assignment');
+                              await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) => AlertDialog(
+                                    content: Text('Do you want to Delete ${e.AssignmentName}'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                          onPressed: () =>  Navigator.pop(context, 'Cancel'),
+                                          child: Text('Cancel')),
+                                      TextButton(
+                                          onPressed: () async{
+                                            final _delAssignmentSuccess = await AssignmentApi.deleteAssignment(e.AssignmentId);
+                                            if(_delAssignmentSuccess){
+                                              print('del assignment success !');
+                                              getAssignments();
+                                              getTotalAssignment();
+                                            }
+                                          },
+                                          child: Text('Confirm'))
+                                    ],
+                                  ));
+                            },
+                          )
+                        ],
                       )
                   ),
                   onTap: (){
