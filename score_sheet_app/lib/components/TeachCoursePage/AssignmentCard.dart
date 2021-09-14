@@ -1,4 +1,5 @@
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:score_sheet_app/apis/AssignmentApi.dart';
 import 'package:score_sheet_app/components/AssignmentPage/AssignmentPage.dart';
@@ -35,32 +36,35 @@ class _AssignmentCard extends State<AssignmentCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: InkWell(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Icon(
-                  Icons.school,
-                  size: 40.0,
-                ),
-                Text('Assignment totals')
-              ],
-            ),
-            Text(_totalAssignments.Count.toString())
-          ],
+      child: Container(
+        padding: EdgeInsets.all(10.0),
+        child: InkWell(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.school,
+                    size: 40.0,
+                  ),
+                  Text('Assignment totals')
+                ],
+              ),
+              Text(_totalAssignments.Count.toString())
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        AssignmentPage(teachCourse: teachCourse, getTotalAssignment: getTotalAssignments,)
+                ));
+          },
         ),
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      AssignmentPage(teachCourse: teachCourse, getTotalAssignment: getTotalAssignments,)
-          ));
-        },
-      ),
+      )
     );
   }
 }

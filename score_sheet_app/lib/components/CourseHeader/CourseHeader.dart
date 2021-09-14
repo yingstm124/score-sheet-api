@@ -8,15 +8,18 @@ class CourseHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Text(
-          teachCourse.CourseName,
-          style: TextStyle(fontSize: 20.0),
-        ),
-        Text(teachCourse.CourseId.toString()),
-      ],
+    return Container(
+      padding: EdgeInsets.all(15.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            teachCourse.CourseName,
+            style: TextStyle(fontSize: 20.0),
+          ),
+          Text(teachCourse.CourseId.toString()),
+        ],
+      ),
     );
   }
 }

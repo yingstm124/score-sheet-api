@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:score_sheet_app/apis/TeachStudentApi.dart';
 import 'package:score_sheet_app/components/TeachStudentPage/TeachStudentPage.dart';
@@ -34,32 +35,35 @@ class _TeachStudentCard extends State<TeachStudentCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: InkWell(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Icon(
-                  Icons.perm_identity,
-                  size: 40.0,
-                ),
-                Text('Student totals')
-              ],
-            ),
-            Text(_teachStudents.length.toString())
-          ],
+      child: Container(
+        padding: EdgeInsets.all(10.0),
+        child: InkWell(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.perm_identity,
+                    size: 40.0,
+                  ),
+                  Text('Student totals')
+                ],
+              ),
+              Text(_teachStudents.length.toString())
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        TeachStudentPage(teachCourse: teachCourse,getTeachStudents: getTeachStudents,))
+            );
+          },
         ),
-        onTap: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      TeachStudentPage(teachCourse: teachCourse,getTeachStudents: getTeachStudents,))
-          );
-        },
-      ),
+      )
     );
   }
 }

@@ -1,9 +1,11 @@
 
 import 'package:flutter/material.dart';
+import 'package:score_sheet_app/apis/ExportApi.dart';
 import 'package:score_sheet_app/components/CourseHeader/CourseHeader.dart';
 import 'package:score_sheet_app/components/TeachCoursePage/AssignmentCard.dart';
 import 'package:score_sheet_app/components/TeachCoursePage/TeachStudentCard.dart';
 import 'package:score_sheet_app/models/TeachCourse.dart';
+import 'package:excel/excel.dart';
 
 class TeachCoursePage extends StatelessWidget {
   TeachCourse teachCourse;
@@ -32,6 +34,18 @@ class TeachCoursePage extends StatelessWidget {
             )
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          print('Export');
+          final results = await ExportApi.getExportInfo(teachCourse.TeachCourseId);
+          await ExportApi.createExcel(results, teachCourse);
+
+        },
+        child: Icon(
+          Icons.file_download,
+        ),
+        backgroundColor: Colors.green,
       ),
     );
   }
