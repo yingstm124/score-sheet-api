@@ -25,7 +25,9 @@ class _TeachStudentPage extends State<TeachStudentPage> {
   @override
   void initState() {
     _getTeachStudents();
+    super.initState();
   }
+
 
   void _getTeachStudents() async{
     final results = await TeachStudentApi.getTeachStudents(teachCourse.TeachCourseId);
@@ -57,13 +59,30 @@ class _TeachStudentPage extends State<TeachStudentPage> {
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () async{
-                        // delete
-                        print(e.TeachStudentId);
-                        final _deleteSuccess = await TeachStudentApi.deleteTeachStudents(e.TeachStudentId);
-                        if(_deleteSuccess){
-                          getTeachStudents();
-                          _getTeachStudents();
-                        }
+                          await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Delete'),
+                                  content: const Text('Do you want to Delete'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                        onPressed: () => Navigator.pop(context, 'Cancel'),
+                                        child: Text('Cancel')),
+                                    TextButton(
+                                        onPressed: () async {
+                                          // delete
+                                          print(e.TeachStudentId);
+                                          final _deleteSuccess = await TeachStudentApi.deleteTeachStudents(e.TeachStudentId);
+                                          if(_deleteSuccess){
+                                            getTeachStudents();
+                                            _getTeachStudents();
+                                          }
+                                        },
+                                        child: Text('Confirm'))
+                                  ],
+                                );
+                              });
                       },
                     )
                   );
@@ -79,7 +98,7 @@ class _TeachStudentPage extends State<TeachStudentPage> {
                 barrierDismissible: false, // user must tap button!
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: const Text('Section number'),
+                    title: const Text('Import only file csv'),
                     content: ImportCSVForm(teachCourse: teachCourse, getTeachStudents: _getTeachStudents,)
                   );
                 },

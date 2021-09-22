@@ -37,6 +37,9 @@ dependencies:
   camera: ^0.8.1+5
   flutter_speed_dial: ^4.1.0
   image_picker: ^0.8.2
+  syncfusion_flutter_xlsio: ^19.2.60-beta
+  excel: ^2.0.0-null-safety-3
+  path_provider: ^2.0.3
 
 dev_dependencies:
   flutter_test:

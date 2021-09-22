@@ -168,7 +168,7 @@ class _AssignmentPage extends State<AssignmentPage>{
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                      title: const Text('Section number'),
+                      title: const Text('New Assignment'),
                       content: AssignmentAddForm(teachCourse: teachCourse, getAssignments: getAssignments, getTotalAssignment: getTotalAssignment,)
                   );
                 }
