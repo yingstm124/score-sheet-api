@@ -1,6 +1,5 @@
 Flask==2.0.1
 Flask-Cors==3.0.10
-pymssql==2.2.2
 PyMySQL==1.0.2
 Werkzeug==2.0.1
 keras==2.6.0
