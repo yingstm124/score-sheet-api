@@ -1,10 +1,3 @@
-FROM python:3.6.15
-
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-
-COPY . /app
+FROM python:3.7.8
 
 RUN pip install -r requirements.txt
-
-ENTRYPOINT ["python app.py"]

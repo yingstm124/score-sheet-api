@@ -9,7 +9,7 @@ import pymysql
 cursor = getDb().cursor()
 
 
-@app.route('/teachStudents', methods=['GET', 'POST'])
+@app.route('/teachStudents', methods=['GET'])
 def getTeachStudents():
     
     teach_course_id = request.args.get('teachCourseId') 
