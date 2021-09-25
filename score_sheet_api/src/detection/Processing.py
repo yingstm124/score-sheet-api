@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-import score_sheet_api.detection.Utility as Utility
+import score_sheet_api.src.detection.Utility as Utility
 from keras.models import load_model
 import os
 
