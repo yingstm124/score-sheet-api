@@ -44,18 +44,11 @@ class Sheets:
         binary_external_cell, rgb_external_cell = self.getExternalCell(contours,10)
         bi_rows, rgb_rows = self.boundingRows(binary_external_cell, rgb_external_cell,buffer=85)
 
-        if(self.debug):
-            Utility.showImage(self.binary_image, "orginal binary image")
-            Utility.showImage(binary_external_cell, "number of row : {0}".format(len(bi_rows)))
-            Utility.showImage(rgb_external_cell, "number of row : {0}".format(len(bi_rows)))
-
         # predict inside of row
-        # loop rows
         for row in range(len(rgb_rows)):
         
-            if(self.debug and len(rgb_rows[row]) > 0):
-                Utility.showImage(rgb_rows[row], "show row {0}".format(row))
             binary_cols, rgb_cols = self.boundingCols(bi_rows[row],rgb_rows[row],15)
+            
             # loop cols
             if(row == 0):
                 is_student_cell = True
@@ -77,22 +70,11 @@ class Sheets:
                             result_digit = int(str(result_digit) + str(new_result_digit))
                         else:
                             result_digit = result_digit + new_result_digit*math.pow(10,len(digits)-(index+1))
-        
-                        if(self.debug):
-                            Utility.showImage(digit_28_resized,"28 x 28 digit size : {0} : {1}".format(result_digit, accuracy))
                     
                     if(is_student_cell):
                         datas["StudentId"] = result_digit
                     else:
                         datas["Scores"].append(int(result_digit))
- 
-                if(self.debug and len(rgb_cols[col]) > 0 and row not in [1,2]):
-                    w = rgb_cols[col].shape[1]
-                    h = rgb_cols[col].shape[0]
-                    Utility.showImage(rgb_cols[col],"show row {0} col {1} : width x height = {2} x {3}".format(row,col,w,h))
-
-        if(self.debug):
-            print(datas)
 
         if(datas["StudentId"] == ""):
             datas["StudentId"] = 0
@@ -163,15 +145,8 @@ class Sheets:
                 bi_rows.append(b_r)
                 rgb_row.append(rgb_r)
 
-            if(debug and result is not None):
-                cv2.putText(result, "{0}".format(i), (x,y),cv2.FONT_HERSHEY_SIMPLEX, 2, (255,0,0),2,cv2.LINE_AA)
-                cv2.drawContours(result, [c], -1, (36,255,12), 2)
-
             i += 1
             pre_y = y
-        
-        if(debug and result is not None):
-            Utility.showImage(result, "result")
         
         return bi_rows, rgb_row
 
@@ -195,9 +170,6 @@ class Sheets:
                 bi_col = binary_img[y+buffer:y+h-buffer, x+buffer:x+w-buffer]
                 bi_cols.append(bi_col)
                 rgb_cols.append(rgb_col)
-                
-                if(debug): 
-                    Utility.showImage(rgb_col, "col {0}".format(i))
 
                 i += 1
 
@@ -228,9 +200,6 @@ class Sheets:
 
             if(self.isDigit(w,h,min_width,min_height)):
                 bi_digits.append(digit)
-                if(debug):
-                    Utility.showImage(digit, "digit")
-
 
         return bi_digits
 
