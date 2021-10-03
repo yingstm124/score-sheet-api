@@ -27,17 +27,17 @@ def getTeachCourses():
                 INNER JOIN Courses C on C.CourseId = TC.CourseId'''
             cursor.execute(query)
             res = cursor.fetchall()
+            headers = [c[0] for c in cursor.description ]
             
-            if(res == None):
+            if(len(res) == 0):
                 print("No content")
                 return ('',204)
-            
-        
+
         except pymysql.Error as err:
             print(err)
             return Handle_error(err, 500)
             
-    return jsonify(res), 200
+    return Convert_to_Json(headers, res)
 
 @app.route('/teachCourse', methods=['GET'])
 def getTeachCourse():
@@ -52,17 +52,17 @@ def getTeachCourse():
                 INNER JOIN Courses C on C.CourseId = TC.CourseId 
                 WHERE TC.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
-            row_headers=[x[0].lower() for x in cursor.description]
+            headers= [x[0] for x in cursor.description]
             res = cursor.fetchall()
             
-            if(res == None):
+            if(len(res) == 0):
                 return ('',204)
         
         except pymysql.Error  as err:
             print(err)
             return Handle_error(err, 500)
         
-    return jsonify(res), 200
+    return Convert_to_Json(headers, res)
 
 
     

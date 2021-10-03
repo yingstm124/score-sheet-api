@@ -27,6 +27,7 @@ def getExportInfo():
             '''.format(teach_course_id)
             cursor.execute(query)
             res = cursor.fetchall()
+            headers = [x[0] for x in cursor.description]
 
             if(res == None):
                 return ('',204)
@@ -36,4 +37,4 @@ def getExportInfo():
             print(err)
             return Handle_error(err,500)
 
-        return jsonify(res), 200
+        return Convert_to_Json(headers, res)

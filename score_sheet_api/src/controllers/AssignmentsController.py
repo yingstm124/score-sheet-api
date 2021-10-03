@@ -1,7 +1,7 @@
 from score_sheet_api import app
 from flask import Flask, request, jsonify, json
 from score_sheet_api.src.config.database import getDb
-from score_sheet_api.src.helpers.DbUtillity import Convert_to_Json, Handle_error
+from score_sheet_api.src.helpers.DbUtillity import Convert_to_Json, Handle_error, Covert_to_Object_Json
 
 import pymysql
 
@@ -18,19 +18,16 @@ def getAssignments():
             query = '''
                         SELECT * 
                         From Assignments A 
-                        WHERE A.TeachCourseId = {0}'''.format(teach_course_id)
-            cursor.execute(query)
+                        WHERE A.TeachCourseId = ?'''
+            cursor.execute(query, teach_course_id)
             res = cursor.fetchall()
+            headers = [x[0] for x in cursor.description]
             
-            if(res == None):
-                print("No Content")
-                return ('',204)
-        
         except pymysql.Error as err:
             print(err)
             return Handle_error(err, 500)
         
-    return jsonify(res), 200
+    return Convert_to_Json(headers, res)
 
 
 
@@ -46,16 +43,13 @@ def getCountAssignments():
                 From Assignments A 
                 WHERE A.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
-            res = cursor.fetchone()
-            
-            if(res == None):
-                return ('',204)
+            res = Covert_to_Object_Json(cursor.description[0], cursor.fetchone())
             
         except pymysql.Error as err:
             print(err)
             return Handle_error(err, 500)
 
-        return jsonify(res), 200
+        return jsonify(res)
     
     
 @app.route('/addAssignment',methods=['POST'])
@@ -63,6 +57,14 @@ def addAssignment():
     
     teach_course_id = request.args.get('teachCourseId') 
     if(request.method == 'POST'):
+
+        '''
+        input {
+            'AssignmentName': 
+            'FullScore':
+        }
+        '''
+
         assignmentName = request.json['AssignmentName']
         fullScore = request.json['FullScore']
         
@@ -78,18 +80,20 @@ def addAssignment():
             #insert assignment
             query_insert = ''' 
                             INSERT INTO Assignments (TeachCourseId,FullScore,AssignmentName)
-                            VALUES(%s,%s,%s)'''
+                            VALUES(?,?,?)'''
             cursor.execute(query_insert,(teach_course_id, fullScore, assignmentName))
-            assignment_id = cursor.lastrowid
-            getDb().commit()      
+            cursor.commit()
 
-            if(teach_stds != None):
+            cursor.execute("SELECT @@IDENTITY AS ID")
+            assignment_id = cursor.fetchone().ID     
+
+            if(len(teach_stds) != 0):
                 for teach_std in teach_stds:
                     query_add = '''
                             INSERT INTO StudentAssignments (TeachStudentId, AssignmentId) 
-                            VALUES (%s,%s)'''
+                            VALUES (?,?)'''
                     cursor.execute(query_add,(int(teach_std['TeachStudentId']),int(assignment_id)))
-                    getDb().commit()
+                    cursor.commit()
             
             return jsonify(True), 200
         
@@ -105,14 +109,18 @@ def deleteAssignment():
     if(request.method == 'POST'):
         
         try:
-            query = "Delete From StudentScores Where AssignmentId = {0}".format(int(AssignmentId))
-            cursor.execute(query)
+            query = "Delete From StudentScores Where AssignmentId = ?;"
+            cursor.execute(query, int(AssignmentId))
+            cursor.commit()
 
-            query = "Delete From StudentAssignments Where AssignmentId = {0}".format(int(AssignmentId))
-            cursor.execute(query)
+            query = "Delete From StudentAssignments Where AssignmentId = ?;"
+            cursor.execute(query, int(AssignmentId))
+            cursor.commit()
 
-            query = "Delete From Assignments Where AssignmentId = {0}".format(int(AssignmentId))
-            cursor.execute(query)
+            query = "Delete From Assignments Where AssignmentId = ?;"
+            cursor.execute(query, int(AssignmentId))
+            cursor.commit()
+
             return jsonify(True), 200
         
         except pymysql.Error as err:
@@ -130,10 +138,12 @@ def editAssignment():
         try:
             query = '''
                     UPDATE Assignments
-                    SET AssignmentName=%s 
-                    WHERE AssignmentId=%s
+                    SET AssignmentName=?
+                    WHERE AssignmentId=?
             '''
             cursor.execute(query,(AssignmentName, AssignmentId))
+            cursor.commit()
+
             return jsonify(True), 200
 
         except pymysql.Error as err:

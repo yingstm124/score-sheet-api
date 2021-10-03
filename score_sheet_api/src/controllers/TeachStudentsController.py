@@ -1,13 +1,12 @@
 from score_sheet_api import app
 from flask import Flask, request, jsonify, json
 from score_sheet_api.src.config.database import getDb
-from score_sheet_api.src.helpers.DbUtillity import Convert_to_Json, Handle_error
+from score_sheet_api.src.helpers.DbUtillity import Convert_to_Json, Handle_error, Covert_to_Object_Json
 
 import pymysql
 
 # initial database
 cursor = getDb().cursor()
-
 
 @app.route('/teachStudents', methods=['GET'])
 def getTeachStudents():
@@ -21,18 +20,13 @@ def getTeachStudents():
                     WHERE TS.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
             res = cursor.fetchall()
-            
-            if(res == None):
-                print("No Content")
-                return ('',204)
+            headers = [ x[0] for x in cursor.description]
         
-        except pymysql.Error as err:
+        except Exception as err:
             print(err)
             return Handle_error(err, 500)
-
-    response = jsonify(res)
             
-    return jsonify(res), 200
+    return Convert_to_Json(headers, res)
 
 
 @app.route('/countTeachStudents', methods=['GET'])
@@ -46,12 +40,7 @@ def getCountTeachStudents():
                     INNER JOIN TeachStudents ts ON tc.TeachCourseId = ts.TeachCourseId 
                     WHERE tc.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
-            res = cursor.fetchone()
-            
-            if(res == None):
-                print("No Content")
-                return ('',204)
-        
+            res = Covert_to_Object_Json(cursor.description[0], cursor.fetchone())
         
         except pymysql.Error as err:
             print(err)
@@ -127,10 +116,12 @@ def addTeachStudent():
                 if(insert_student["IsRegister"]):
                     query = '''
                                 INSERT INTO TeachStudents(StudentId, TeachCourseId, SecNo) 
-                                VALUES(%s,%s,%s)'''
-                    cursor.execute(query,(int(insert_student["StudentId"]), int(teach_course_id), int(insert_student["SecNo"])))
-                    teachStudentId = cursor.lastrowid
-                    getDb().commit()
+                                VALUES(?,?,?)'''
+                    cursor.execute(query,[int(insert_student["StudentId"]), int(teach_course_id), int(insert_student["SecNo"])])
+                    cursor.commit()
+
+                    cursor.execute("SELECT @@IDENTITY AS ID")
+                    teachStudentId = cursor.fetchone().ID
 
                     # check assignment from teach course id
                     query = ''' 
@@ -144,10 +135,9 @@ def addTeachStudent():
                         for assignmentId in assignmentIds:
                             q = '''
                                     INSERT INTO StudentAssignments (TeachStudentId,AssignmentId) 
-                                    VALUES(%s,%s)'''
-                            cursor.execute(q, (int(teachStudentId),int(assignmentId["AssignmentId"])))
-                            getDb().commit()
-
+                                    VALUES(?,?)'''
+                            cursor.execute(q, (teachStudentId,assignmentId.AssignmentId))
+                            cursor.commit()
 
             response = jsonify(insert_students)
             return jsonify(insert_students), 200
@@ -166,14 +156,14 @@ def deleteTeachStudent():
         try:
             
             query = '''Delete From StudentAssignments 
-                    Where TeachStudentId = {0}'''.format(int(teachStudentId))
-            cursor.execute(query)
-            getDb().commit()
+                    Where TeachStudentId = ?'''
+            cursor.execute(query, teachStudentId)
+            cursor.commit()
             
             query = '''Delete From TeachStudents 
-                    Where TeachStudentId = {0}'''.format(int(teachStudentId))
-            cursor.execute(query)
-            getDb().commit()
+                    Where TeachStudentId = ?'''
+            cursor.execute(query, teachStudentId)
+            cursor.commit()
             
             return jsonify(True), 200
         

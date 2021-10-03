@@ -30,11 +30,6 @@ def saveScore():
             "TeachCourseId": int
         }
     '''
-    # scores = request.args.get('Scores')
-    # student_id = request.args.get('StudentId')
-    # assignment_id = request.args.get('AssignmentId')
-    # teachcourse_id = request.args.get('TeachCourseId')
-
     scores = request.json["Scores"]
     student_id = request.json["StudentId"]
     teach_student_id = request.json["TeachStudentId"]
@@ -73,16 +68,18 @@ def saveScore():
                 # Case 1.1 : never detect, insert Score Records
                 if(len(res) == 0):
                     for index, score in enumerate(scores):
-                        query_insert_score = '''INSERT INTO Scores(AssignmentId,score, pageNo) 
-                                                VALUES(%s,%s,%s)'''
-                        cursor.execute(query_insert_score,(assignment_id, score, index+1))
-                        score_id = cursor.lastrowid
-                        getDb().commit()
+                        query_insert_score = '''INSERT INTO Scores(AssignmentId,FullScore) 
+                                                VALUES(?,?)'''
+                        cursor.execute(query_insert_score,(assignment_id, score))
+                        cursor.commit()
+
+                        cursor.execute("SELECT @@IDENTITY AS ID")
+                        score_id = cursor.fetchone().ID 
 
                         query_insert_student_score = '''INSERT INTO StudentScores(StudentId,ScoreId,Score,AssignmentId) 
-                                                        VALUES(%s,%s,%s,%s)'''
+                                                        VALUES(?,?,?,?)'''
                         res = cursor.execute(query_insert_student_score,(int(student_id),int(score_id),int(score),int(assignment_id)))
-                        getDb().commit()
+                        cursor.commit()
 
                     return jsonify(response), 200
 
@@ -92,10 +89,10 @@ def saveScore():
                     for index, score in enumerate(scores):
                         if(index < len(scores)):
                             query = ''' update Scores 
-                                    SET Score=%s,PageNo=%s
-                                    WHERE ScoreId = {0} '''.format(int(res[index]["ScoreId"]))
-                            cursor.execute(query, (int(score),int(index+1)))
-                            getDb().commit()
+                                    SET FullScore=?
+                                    WHERE ScoreId = {0} '''.format(int(res[index].ScoreId))
+                            cursor.execute(query, (int(score)))
+                            cursor.commit()
 
                 # Find Student Assignment Id
                 query_select_id = '''select SA.StudentAssignmentId 
@@ -103,13 +100,13 @@ def saveScore():
                                     Where TeachStudentId = {0} AND AssignmentId = {1}'''.format(teach_student_id,assignment_id)
                 cursor.execute(query_select_id)
                 res = cursor.fetchone()
-                student_assign_id = res["StudentAssignmentId"]
+                student_assign_id = res.StudentAssignmentId
 
                 query_update = '''UPDATE StudentAssignments 
-                                SET Score=%s 
-                                Where StudentAssignmentId=%s'''
+                                SET Score=? 
+                                Where StudentAssignmentId=?'''
                 cursor.execute(query_update,(sum(scores),int(student_assign_id)))
-                getDb().commit()
+                cursor.commit()
 
                 response["Message"] = "Already Detect"
                 return jsonify(response), 200

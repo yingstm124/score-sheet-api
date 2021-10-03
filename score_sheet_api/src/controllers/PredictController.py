@@ -63,8 +63,8 @@ def predict():
 
                 if(res != None):
                     datas["Message"] = "Found Student"
-                    datas["TeachStudentId"] = res["TeachStudentId"]
-                    found_student_id = res['StudentId']
+                    datas["TeachStudentId"] = res.TeachStudentId
+                    found_student_id = res.StudentId
                     query = '''
                         select SS.Score 
                         from studentscores SS 
@@ -78,7 +78,7 @@ def predict():
 
                     old_scores = []
                     for r in res:
-                        old_scores.append(r['FullScore'])
+                        old_scores.append(r.FullScore)
                     datas["OldScore"] = old_scores
                     return datas
 

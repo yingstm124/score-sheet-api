@@ -28,7 +28,7 @@ def uploadImage():
                     Where TeachStudentId = {0} AND AssignmentId = {1}'''.format(teach_std_id,assignment_id)
                 cursor.execute(query_select_id)
                 res = cursor.fetchone()
-                student_assign_id = res["StudentAssignmentId"]
+                student_assign_id = res.StudentAssignmentId
 
                 # Check duplicate image
                 query_select = '''
@@ -38,14 +38,15 @@ def uploadImage():
                 cursor.execute(query_select)
                 res = cursor.fetchone()
 
-                if(res['img'] != None):
-                    os.remove(app.root_path+res['img'])
+                if(res.img != None):
+                    os.remove(app.root_path+res.img)
 
                 query = '''
                     UPDATE studentassignments 
-                    SET img=%s 
-                    WHERE StudentAssignmentId=%s'''
+                    SET img=? 
+                    WHERE StudentAssignmentId=?'''
                 cursor.execute(query,('/static/'+filename, int(student_assign_id)))
+                cursor.commit()
 
                 pathImage = os.path.join(app.root_path,'./static/',filename)
                 image.save(pathImage)
@@ -54,8 +55,7 @@ def uploadImage():
 
             else:
                 return jsonify(0), 204
-            
-        
+
         except Exception as err:
             print(err)
             return Handle_error(0, 500)

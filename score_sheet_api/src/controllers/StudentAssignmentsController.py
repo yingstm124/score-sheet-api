@@ -24,19 +24,15 @@ def getStudentAssignments():
                 Where SA.AssignmentId = {0} '''.format(int(assignment_id))
             cursor.execute(query)
             res = cursor.fetchall()
+            headers = [x[0] for x in cursor.description]
             for r in res:
-                print(r['Score'])
-                if(r['Score'] != None ):
-                    r['Score'] = int(r['Score'])
+                if(r.Score != None ):
+                    r.Score = int(r.Score)
                 else:
-                    r['Score'] = 0
-
-            if(res == None):
-                print("No content")
-                return ('',204)
+                    r.Score = 0
             
         except pymysql.Error as err:
             print(err)
             return Handle_error(err, 500)
     
-    return jsonify(res), 200
+    return Convert_to_Json(headers, res)

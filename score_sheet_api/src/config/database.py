@@ -1,19 +1,23 @@
 
 import pymysql
+import pyodbc
+import pymssql
 
 
 def getDb():
 
-    conn = pymysql.connect(
+    # conn = pymysql.connect(
 
-        user = 'root',
-        host = 'localhost', 
-        password = '27365410', 
-        database = 'ScoreSheet', 
-        autocommit = True, 
-        charset = 'utf8mb4', 
-        cursorclass = pymysql.cursors.DictCursor
-    )
+    #     user = 'root',
+    #     host = 'localhost', 
+    #     password = '27365410', 
+    #     database = 'ScoreSheet', 
+    #     autocommit = True, 
+    #     charset = 'utf8mb4', 
+    #     cursorclass = pymysql.cursors.DictCursor
+    # )
+
+    conn = pyodbc.connect("Driver={ODBC Driver 13 for SQL Server};Server=tcp:scoresheet.database.windows.net,1433;Database=score_sheet_db;Uid=scoresheetAdmin;Pwd=ss@27365410;Encrypt=yes;TrustServerCertificate=no;")
 
     # conn = pymysql.connect(
 
