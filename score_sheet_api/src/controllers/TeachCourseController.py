@@ -14,7 +14,7 @@ cursor = getDb().cursor()
 @app.route('/')
 def hello():
     print(os.getcwd())
-    return 'Hello Score Sheet ! http://{0}:{1}'.format(socket.gethostbyname(socket.gethostname()),3000)
+    return 'Hello Score Sheet ! http://{0}:{1}'.format(socket.gethostbyname(socket.gethostname()),5000)
 
 @app.route('/teachCourses', methods=['GET'])
 def getTeachCourses():

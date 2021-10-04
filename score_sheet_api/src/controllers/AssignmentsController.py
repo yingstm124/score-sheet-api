@@ -43,7 +43,8 @@ def getCountAssignments():
                 From Assignments A 
                 WHERE A.TeachCourseId = {0}'''.format(teach_course_id)
             cursor.execute(query)
-            res = Covert_to_Object_Json(cursor.description[0], cursor.fetchone())
+
+            res = {'Count': cursor.fetchone().Count}
             
         except pymysql.Error as err:
             print(err)
@@ -92,7 +93,7 @@ def addAssignment():
                     query_add = '''
                             INSERT INTO StudentAssignments (TeachStudentId, AssignmentId) 
                             VALUES (?,?)'''
-                    cursor.execute(query_add,(int(teach_std['TeachStudentId']),int(assignment_id)))
+                    cursor.execute(query_add,(int(teach_std.TeachStudentId),int(assignment_id)))
                     cursor.commit()
             
             return jsonify(True), 200
