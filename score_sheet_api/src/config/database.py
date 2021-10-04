@@ -1,7 +1,6 @@
 
 import pymysql
 import pyodbc
-import pymssql
 
 
 def getDb():
