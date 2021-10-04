@@ -6,6 +6,7 @@ from score_sheet_api.src.helpers.DbUtillity import Convert_to_Json, Handle_error
 
 import os
 import pymysql
+import socket
 
 # initial database
 cursor = getDb().cursor()
@@ -13,7 +14,7 @@ cursor = getDb().cursor()
 @app.route('/')
 def hello():
     print(os.getcwd())
-    return 'Hello Score Sheet !';
+    return 'Hello Score Sheet ! http://{0}:{1}'.format(socket.gethostbyname(socket.gethostname()),3000)
 
 @app.route('/teachCourses', methods=['GET'])
 def getTeachCourses():
@@ -32,7 +33,7 @@ def getTeachCourses():
             if(len(res) == 0):
                 print("No content")
                 return ('',204)
-
+        
         except pymysql.Error as err:
             print(err)
             return Handle_error(err, 500)
