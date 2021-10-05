@@ -1,0 +1,2 @@
+docker build . --tag yingstm124/score-sheet:latest
+docker run --rm -p 5000:5000 yingstm124/score-sheet:latest
