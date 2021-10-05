@@ -1,10 +1,27 @@
-FROM python:3.7.8
+FROM tiangolo/uwsgi-nginx:python3.7-2021-10-02
 
-RUN pip install -r requirements.txt
+ENV LISTEN_PORT=5000
+EXPOSE 5000
 
-COPY src/ app/
-WORKDIR /app
+ENV UWSGI_INI uwsgi.ini
 
-ENV PORT 8080
+WORKDIR /score_sheet_api
 
-CMD exec gunicorn --bind :$PORT --workers 1 --threade 8 app:app
+COPY . /score_sheet_api
+
+ENV ACCEPT_EULA=Y
+RUN apt-get update
+RUN apt-get install ffmpeg libsm6 libxext6 curl gcc g++ gnupg unixodbc-dev -y
+
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+  && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends --allow-unauthenticated msodbcsql17 mssql-tools \
+  && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile \
+  && echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+
+RUN apt-get -y clean
+
+COPY requirements.txt /
+RUN pip install --no-cache-dir -U pip
+RUN pip install --no-cache-dir -r /requirements.txt

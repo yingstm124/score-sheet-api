@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 import score_sheet_api.src.detection.Utility as Utility
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 import os
 
 class Sheets:
@@ -10,21 +10,21 @@ class Sheets:
     def __init__(self, img, binaryImage, debug=False, max_cols=20):
         self.debug = debug
         self.original_image = img
-        self.binary_image = binaryImage  
+        self.binary_image = binaryImage
         self.min_width_cell =  self.binary_image.shape[1]/max_cols
-        self.max_cols = max_cols  
+        self.max_cols = max_cols
         root_path = os.path.dirname(__file__)
         model_path = 'models/mnist.h5'
         self.model = load_model(os.path.join(root_path,model_path))
 
     def processing(self):
-        ''' 
+        '''
             - POC Issue sorted contours -
 
             [/] 1. get external cell by using external contouring
             [/] 2. get rows by using contouring
             [/] 3. order row and colum of cell
-            [ ] 4. predict & mapping data structure 
+            [ ] 4. predict & mapping data structure
                     : identify three part
                         - Text
                         - Number Text
@@ -46,17 +46,17 @@ class Sheets:
 
         # predict inside of row
         for row in range(len(rgb_rows)):
-        
+
             binary_cols, rgb_cols = self.boundingCols(bi_rows[row],rgb_rows[row],15)
-            
+
             # loop cols
             if(row == 0):
                 is_student_cell = True
             else:
                 is_student_cell = False
-            
+
             for col in range(len(rgb_cols)):
-                
+
                 # segment digit and predict
                 if(self.isDigitBox(row,col)):
                     digits = self.boundingDigits(binary_cols[col],rgb_cols[col], is_student_cell)
@@ -70,7 +70,7 @@ class Sheets:
                             result_digit = int(str(result_digit) + str(new_result_digit))
                         else:
                             result_digit = result_digit + new_result_digit*math.pow(10,len(digits)-(index+1))
-                    
+
                     if(is_student_cell):
                         datas["StudentId"] = result_digit
                     else:
@@ -89,8 +89,8 @@ class Sheets:
 
     def isDigitBox(self, row, col):
         # specific patern
-        text_rows = [1,2] 
-        return row not in text_rows and col > 0 
+        text_rows = [1,2]
+        return row not in text_rows and col > 0
 
     def isDigit(self, width, height, min_width, min_height):
         return width > min_width and height > min_height
@@ -103,12 +103,12 @@ class Sheets:
             approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
             x, y, w, h = cv2.boundingRect(approx)
 
-            if(self.isSquareBox(approx) and self.isCellBox(approx,w)):    
+            if(self.isSquareBox(approx) and self.isCellBox(approx,w)):
                 bi_img = self.binary_image[y-buffer:y+h+buffer, x-buffer:x+w+buffer]
                 rgb_img = self.original_image[y-buffer:y+h+buffer, x-buffer:x+w+buffer]
                 binary_external_cells.append(bi_img)
                 rgb_external_cells.append(rgb_img)
-        
+
         return binary_external_cells[0], rgb_external_cells[0]
 
     def boundingRows(self, binary_img, rgb_img=None,buffer=0, debug=False):
@@ -120,7 +120,7 @@ class Sheets:
         # segment row
         contours, _ = Utility.contours(detect_horizontal)
         contours, _ = Utility.sortContours(contours,method="top-to-bottom")
-        
+
         if(rgb_img is not None):
             result = rgb_img.copy()
         else:
@@ -147,7 +147,7 @@ class Sheets:
 
             i += 1
             pre_y = y
-        
+
         return bi_rows, rgb_row
 
     def boundingCols(self, binary_img, rgb_img, buffer=0,debug=False):
@@ -159,13 +159,13 @@ class Sheets:
         max_width = binary_img.shape[1]
         i = 0
         bi_cols = []
-        rgb_cols = [] 
+        rgb_cols = []
         for c in contours:
             peri = cv2.arcLength(c, True)
             approx = cv2.approxPolyDP(c, 0.02*peri, True)
             x, y, w, h = Utility.getAreaByContour(c)
 
-            if(self.isSquareBox(approx) and w < max_width - 100 and w > 100):    
+            if(self.isSquareBox(approx) and w < max_width - 100 and w > 100):
                 rgb_col = rgb_img[y+buffer:y+h-buffer, x+buffer:x+w-buffer]
                 bi_col = binary_img[y+buffer:y+h-buffer, x+buffer:x+w-buffer]
                 bi_cols.append(bi_col)
@@ -188,7 +188,7 @@ class Sheets:
             max_digit = 60
         else:
             max_digit = 3
- 
+
         bi_digits = []
         for c in contours:
             peri = cv2.arcLength(c, True)
@@ -210,4 +210,3 @@ class Sheets:
         return np.argmax(res) , max(res)
 
 
-    
