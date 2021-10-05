@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx:python3.7-2021-10-02
+FROM tiangolo/uwsgi-nginx-flask:python3.7
 
 ENV LISTEN_PORT=5000
 EXPOSE 5000

@@ -18,7 +18,7 @@ cursor = getDb().cursor()
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    
+
     teachCourse_id = request.args.get('teachCourseId')
     assignment_id = request.args.get('assignmentId')
     if(request.method == "POST"):
@@ -54,9 +54,9 @@ def predict():
 
                 # check Student ID
                 query = '''
-                    select S.StudentId, TS.TeachStudentId 
-                    from students S 
-                    inner join teachStudents TS on TS.StudentId = S.StudentId 
+                    select S.StudentId, TS.TeachStudentId
+                    from students S
+                    inner join teachStudents TS on TS.StudentId = S.StudentId
                     Where S.StudentId = {0} And TS.TeachCourseId = {1}'''.format(result_studentId,teachCourse_id)
                 cursor.execute(query)
                 res = cursor.fetchone()
@@ -66,10 +66,10 @@ def predict():
                     datas["TeachStudentId"] = res.TeachStudentId
                     found_student_id = res.StudentId
                     query = '''
-                        select SS.Score 
-                        from studentscores SS 
-                        inner join scores S on SS.ScoreId = S.ScoreId 
-                        inner join assignments A on S.AssignmentId = A.AssignmentId 
+                        select SS.Score
+                        from studentscores SS
+                        inner join scores S on SS.ScoreId = S.ScoreId
+                        inner join assignments A on S.AssignmentId = A.AssignmentId
                         Where S.AssignmentId = {0} And  A.AssignmentId = {1}'''.format(found_student_id,assignment_id)
                     cursor.execute(query)
                     res = cursor.fetchall()
@@ -87,7 +87,7 @@ def predict():
                     return datas
 
                 return datas
-                
+
         except Exception as err:
             print(err)
-            return Handle_error(False)
+            return Handle_error(False, 500)
