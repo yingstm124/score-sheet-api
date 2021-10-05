@@ -90,4 +90,4 @@ def predict():
 
         except Exception as err:
             print(err)
-            return Handle_error(False, 500)
+            return jsonify(False), 500

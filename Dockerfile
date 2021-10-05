@@ -4,6 +4,8 @@ ENV LISTEN_PORT=5000
 EXPOSE 5000
 
 ENV UWSGI_INI uwsgi.ini
+ENV STATIC_URL /static
+ENV STATIC_PATH /score_sheet_api/static
 
 WORKDIR /score_sheet_api
 
