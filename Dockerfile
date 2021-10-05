@@ -9,6 +9,8 @@ ENV STATIC_PATH /score_sheet_api/static
 
 WORKDIR /score_sheet_api
 
+RUN chmod 777 ./
+
 COPY . /score_sheet_api
 
 ENV ACCEPT_EULA=Y
@@ -25,5 +27,8 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
 RUN apt-get -y clean
 
 COPY requirements.txt /
+
 RUN pip install --no-cache-dir -U pip
 RUN pip install --no-cache-dir -r /requirements.txt
+
+
