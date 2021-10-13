@@ -81,8 +81,6 @@ def saveScore():
                         res = cursor.execute(query_insert_student_score,(int(student_id),int(score_id),int(score),int(assignment_id)))
                         cursor.commit()
 
-                    return jsonify(response), 200
-
                 # Case 1.2 : already detect, update Score Records
                 else:
                     # update student score by student score Id
