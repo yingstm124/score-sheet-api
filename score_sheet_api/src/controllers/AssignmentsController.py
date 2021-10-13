@@ -110,16 +110,20 @@ def deleteAssignment():
     if(request.method == 'POST'):
         
         try:
-            query = "Delete From StudentScores Where AssignmentId = ?;"
-            cursor.execute(query, int(AssignmentId))
+            query_del1 = "Delete From StudentScores Where AssignmentId = ?;"
+            cursor.execute(query_del1, int(AssignmentId))
             cursor.commit()
 
-            query = "Delete From StudentAssignments Where AssignmentId = ?;"
-            cursor.execute(query, int(AssignmentId))
+            query_del2 = "Delete From StudentAssignments Where AssignmentId = ?;"
+            cursor.execute(query_del2, int(AssignmentId))
             cursor.commit()
 
-            query = "Delete From Assignments Where AssignmentId = ?;"
-            cursor.execute(query, int(AssignmentId))
+            query_del3 = "Delete From Scores Where AssignmentId = ?;"
+            cursor.execute(query_del3, int(AssignmentId))
+            cursor.commit()
+
+            query_del4 = "Delete From Assignments Where AssignmentId = ?;"
+            cursor.execute(query_del4, int(AssignmentId))
             cursor.commit()
 
             return jsonify(True), 200
