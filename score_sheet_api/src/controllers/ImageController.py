@@ -15,7 +15,7 @@ def uploadImage():
     if(request.method == "POST"):
 
         try:
-            teach_std_id = request.args.get('TeachStudentId')
+            teach_std_id = request.args.get('StudentId')
             assignment_id = request.args.get('AssignmentId')
             if(request.files['image']):
                 image = request.files['image']
@@ -25,7 +25,9 @@ def uploadImage():
                 query_select_id = '''
                     select SA.StudentAssignmentId 
                     from studentassignments SA 
-                    Where TeachStudentId = {0} AND AssignmentId = {1}'''.format(teach_std_id,assignment_id)
+                    inner join teachstudents TS 
+                    on SA.TeachStudentId = TS.TeachStudentId
+                    Where TS.StudentId = {0} AND AssignmentId = {1}'''.format(teach_std_id,assignment_id)
                 cursor.execute(query_select_id)
                 res = cursor.fetchone()
                 student_assign_id = res.StudentAssignmentId
@@ -58,7 +60,7 @@ def uploadImage():
 
         except Exception as err:
             print(err)
-            return Handle_error(0, 500)
+            return jsonify(False), 500
              
 
         

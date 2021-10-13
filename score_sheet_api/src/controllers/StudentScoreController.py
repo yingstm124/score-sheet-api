@@ -94,6 +94,16 @@ def saveScore():
                             cursor.execute(query, (int(score)))
                             cursor.commit()
 
+                # Find Teach Student Id From Student And Assignment
+                query_select_teach_std = '''select TS.TeachStudentId
+                                            from StudentAssignments SA
+                                            inner join TeachStudents TS
+                                            on SA.TeachStudentId = TS.TeachStudentId
+                                            where TS.StudentId = {0} and SA.AssignmentId = {1}'''.format(student_id, assignment_id)
+                cursor.execute(query_select_teach_std)
+                res = cursor.fetchone()
+                teach_student_id = res.TeachStudentId
+
                 # Find Student Assignment Id
                 query_select_id = '''select SA.StudentAssignmentId 
                                     from studentassignments SA 

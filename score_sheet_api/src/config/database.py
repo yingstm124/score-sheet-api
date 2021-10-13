@@ -16,7 +16,7 @@ def getDb():
     #     cursorclass = pymysql.cursors.DictCursor
     # )
 
-    conn = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};Server=tcp:scoresheet.database.windows.net,1433;Database=score_sheet_db;Uid=scoresheetAdmin;Pwd=ss@27365410;Encrypt=yes;TrustServerCertificate=no;")
+    conn = pyodbc.connect("Driver={ODBC Driver 13 for SQL Server};Server=tcp:scoresheet.database.windows.net,1433;Database=score_sheet_db;Uid=scoresheetAdmin;Pwd=ss@27365410;Encrypt=yes;TrustServerCertificate=no;")
 
     # conn = pymysql.connect(
 
